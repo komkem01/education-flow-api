@@ -1,9 +1,9 @@
 package example
 
 import (
-	"mcop/app/utils"
-	"mcop/app/utils/base"
-	"mcop/config/i18n"
+	"eduflow/app/utils"
+	"eduflow/app/utils/base"
+	"eduflow/config/i18n"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oklog/ulid/v2"

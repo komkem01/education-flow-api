@@ -1,7 +1,7 @@
 package example
 
 import (
-	"mcop/app/modules/net/httpx"
+	"eduflow/app/modules/net/httpx"
 
 	"go.opentelemetry.io/otel/trace"
 )

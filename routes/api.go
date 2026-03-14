@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"mcop/app/modules"
+	"eduflow/app/modules"
 
 	"github.com/gin-gonic/gin"
 )

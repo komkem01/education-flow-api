@@ -3,11 +3,11 @@ package cmd
 import (
 	"strings"
 
-	appConf "mcop/config"
-	"mcop/database/migrations"
-	"mcop/internal/config"
-	"mcop/internal/database"
-	"mcop/internal/log"
+	appConf "eduflow/config"
+	"eduflow/database/migrations"
+	"eduflow/internal/config"
+	"eduflow/internal/database"
+	"eduflow/internal/log"
 
 	"github.com/spf13/cobra"
 	"github.com/uptrace/bun/migrate"

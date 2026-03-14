@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"os"
 
-	"mcop/app/console"
-	"mcop/internal/cmd"
+	"eduflow/app/console"
+	"eduflow/internal/cmd"
 
 	"github.com/spf13/cobra"
 )

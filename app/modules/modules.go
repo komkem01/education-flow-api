@@ -4,19 +4,19 @@ import (
 	"log/slog"
 	"sync"
 
-	"mcop/app/modules/entities"
-	"mcop/app/modules/example"
-	"mcop/app/modules/sentry"
-	"mcop/app/modules/specs"
-	"mcop/internal/config"
-	"mcop/internal/database"
-	"mcop/internal/log"
-	"mcop/internal/otel/collector"
+	"eduflow/app/modules/entities"
+	"eduflow/app/modules/example"
+	"eduflow/app/modules/sentry"
+	"eduflow/app/modules/specs"
+	"eduflow/internal/config"
+	"eduflow/internal/database"
+	"eduflow/internal/log"
+	"eduflow/internal/otel/collector"
 
-	exampletwo "mcop/app/modules/example-two"
+	exampletwo "eduflow/app/modules/example-two"
 
-	appConf "mcop/config"
-	// "mcop/app/modules/kafka"
+	appConf "eduflow/config"
+	// "eduflow/app/modules/kafka"
 )
 
 type Modules struct {

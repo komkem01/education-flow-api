@@ -2,7 +2,7 @@ package otel
 
 import (
 	"context"
-	"mcop/internal/log"
+	"eduflow/internal/log"
 	"time"
 
 	"go.opentelemetry.io/otel"

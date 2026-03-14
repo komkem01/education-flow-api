@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"mcop/app/utils/syncx"
-	"mcop/internal/config"
-	kafkainf "mcop/internal/kafka/inf"
-	"mcop/internal/log"
-	"mcop/internal/provider"
+	"eduflow/app/utils/syncx"
+	"eduflow/internal/config"
+	kafkainf "eduflow/internal/kafka/inf"
+	"eduflow/internal/log"
+	"eduflow/internal/provider"
 
 	"github.com/IBM/sarama"
 )

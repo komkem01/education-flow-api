@@ -1,8 +1,8 @@
 package example
 
 import (
-	entitiesinf "mcop/app/modules/entities/inf"
-	"mcop/internal/config"
+	entitiesinf "eduflow/app/modules/entities/inf"
+	"eduflow/internal/config"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
@@ -15,7 +15,7 @@ type Module struct {
 }
 
 func New(conf *config.Config[Config], db entitiesinf.ExampleEntity) *Module {
-	tracer := otel.Tracer("mcop.modules.example")
+	tracer := otel.Tracer("eduflow.modules.example")
 	svc := newService(&Options{
 		Config: conf,
 		tracer: tracer,

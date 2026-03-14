@@ -1,6 +1,6 @@
 package log
 
-import "mcop/internal/config"
+import "eduflow/internal/config"
 
 type Middleware struct {
 	Config *config.Config[Option]

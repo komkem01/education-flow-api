@@ -1,8 +1,8 @@
 package exampletwo
 
 import (
-	entitiesinf "mcop/app/modules/entities/inf"
-	"mcop/internal/config"
+	entitiesinf "eduflow/app/modules/entities/inf"
+	"eduflow/internal/config"
 )
 
 type (

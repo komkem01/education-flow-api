@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"mcop/internal/http"
+	"eduflow/internal/http"
 
 	"github.com/spf13/cobra"
 )
