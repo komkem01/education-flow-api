@@ -250,9 +250,33 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 func apiEnrollments(r *gin.RouterGroup, mod *modules.Modules) {
 	// Enrollment routes (authentication required) e.g. for student enrollments, etc.
 	enrollments := r.Group("/enrollments")
-	_ = enrollments
 	{
-		// Add enrollment routes here
+		studentEnrollments := enrollments.Group("/student-enrollments")
+		{
+			studentEnrollments.GET("", mod.StudentEnrollments.Ctl.StudentEnrollmentsList)
+			studentEnrollments.GET("/:id", mod.StudentEnrollments.Ctl.StudentEnrollmentsInfo)
+			studentEnrollments.POST("", mod.StudentEnrollments.Ctl.CreateStudentEnrollmentController)
+			studentEnrollments.PATCH("/:id", mod.StudentEnrollments.Ctl.StudentEnrollmentsUpdate)
+			studentEnrollments.DELETE("/:id", mod.StudentEnrollments.Ctl.StudentEnrollmentsDelete)
+		}
+
+		enrollmentStatusHistories := enrollments.Group("/enrollment-status-histories")
+		{
+			enrollmentStatusHistories.GET("", mod.EnrollmentStatusHistories.Ctl.EnrollmentStatusHistoriesList)
+			enrollmentStatusHistories.GET("/:id", mod.EnrollmentStatusHistories.Ctl.EnrollmentStatusHistoriesInfo)
+			enrollmentStatusHistories.POST("", mod.EnrollmentStatusHistories.Ctl.CreateEnrollmentStatusHistoryController)
+			enrollmentStatusHistories.PATCH("/:id", mod.EnrollmentStatusHistories.Ctl.EnrollmentStatusHistoriesUpdate)
+			enrollmentStatusHistories.DELETE("/:id", mod.EnrollmentStatusHistories.Ctl.EnrollmentStatusHistoriesDelete)
+		}
+
+		enrollmentSubjects := enrollments.Group("/enrollment-subjects")
+		{
+			enrollmentSubjects.GET("", mod.EnrollmentSubjects.Ctl.EnrollmentSubjectsList)
+			enrollmentSubjects.GET("/:id", mod.EnrollmentSubjects.Ctl.EnrollmentSubjectsInfo)
+			enrollmentSubjects.POST("", mod.EnrollmentSubjects.Ctl.CreateEnrollmentSubjectController)
+			enrollmentSubjects.PATCH("/:id", mod.EnrollmentSubjects.Ctl.EnrollmentSubjectsUpdate)
+			enrollmentSubjects.DELETE("/:id", mod.EnrollmentSubjects.Ctl.EnrollmentSubjectsDelete)
+		}
 	}
 }
 

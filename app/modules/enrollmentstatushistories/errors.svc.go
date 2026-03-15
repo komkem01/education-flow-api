@@ -1,0 +1,48 @@
+package enrollmentstatushistories
+
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
+
+	"eduflow/app/modules/entities/ent"
+)
+
+var (
+	ErrEnrollmentStatusHistoryNotFound      = errors.New("enrollment-status-history-not-found")
+	ErrEnrollmentStatusHistoryDuplicate     = errors.New("enrollment-status-history-duplicate")
+	ErrEnrollmentStatusHistoryUnauthorized  = errors.New("enrollment-status-history-unauthorized")
+	ErrEnrollmentStatusHistoryConditionFail = errors.New("enrollment-status-history-condition-fail")
+)
+
+func normalizeServiceError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("%w: %v", ErrEnrollmentStatusHistoryNotFound, err)
+	}
+	if isDuplicateKeyError(err) {
+		return fmt.Errorf("%w: %v", ErrEnrollmentStatusHistoryDuplicate, err)
+	}
+	return err
+}
+
+func isDuplicateKeyError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "sqlstate=23505") || strings.Contains(errStr, "duplicate key value") || strings.Contains(errStr, "violates unique constraint")
+}
+
+func parseStudentEnrollmentStatus(v string) (ent.StudentEnrollmentStatus, bool) {
+	status := ent.StudentEnrollmentStatus(v)
+	switch status {
+	case ent.StudentEnrollmentStatusActive, ent.StudentEnrollmentStatusTransferred, ent.StudentEnrollmentStatusGraduated, ent.StudentEnrollmentStatusDropped:
+		return status, true
+	default:
+		return "", false
+	}
+}
