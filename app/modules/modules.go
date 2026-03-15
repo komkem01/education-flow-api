@@ -2,6 +2,7 @@ package modules
 
 import (
 	academicyears "eduflow/app/modules/academicyears"
+	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"log/slog"
 	"sync"
@@ -9,12 +10,15 @@ import (
 	"eduflow/app/modules/entities"
 	"eduflow/app/modules/example"
 	"eduflow/app/modules/genders"
+	"eduflow/app/modules/membermanagements"
 	"eduflow/app/modules/members"
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/prefixes"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/subjectgroups"
+	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
 	"eduflow/app/modules/teacherexperiences"
 	"eduflow/app/modules/teacherrequests"
@@ -45,7 +49,11 @@ type Modules struct {
 	Schools            *schools.Module
 	Departments        *departments.Module
 	AcademicYears      *academicyears.Module
+	Classrooms         *classrooms.Module
+	SubjectGroups      *subjectgroups.Module
+	Subjects           *subjects.Module
 	Members            *members.Module
+	MemberManagements  *membermanagements.Module
 	MemberTeachers     *memberteachers.Module
 	TeacherEducations  *teachereducations.Module
 	TeacherExperiences *teacherexperiences.Module
@@ -72,7 +80,11 @@ func modulesInit() {
 	schoolsMod := schools.New(config.Conf[schools.Config](confMod.Svc), entitiesMod.Svc)
 	departmentsMod := departments.New(config.Conf[departments.Config](confMod.Svc), entitiesMod.Svc)
 	academicYearsMod := academicyears.New(config.Conf[academicyears.Config](confMod.Svc), entitiesMod.Svc)
+	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)
+	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
+	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
 	membersMod := members.New(config.Conf[members.Config](confMod.Svc), entitiesMod.Svc)
+	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc)
 	memberTeachersMod := memberteachers.New(config.Conf[memberteachers.Config](confMod.Svc), entitiesMod.Svc)
 	teacherEducationsMod := teachereducations.New(config.Conf[teachereducations.Config](confMod.Svc), entitiesMod.Svc)
 	teacherExperiencesMod := teacherexperiences.New(config.Conf[teacherexperiences.Config](confMod.Svc), entitiesMod.Svc)
@@ -93,7 +105,11 @@ func modulesInit() {
 		Schools:            schoolsMod,
 		Departments:        departmentsMod,
 		AcademicYears:      academicYearsMod,
+		Classrooms:         classroomsMod,
+		SubjectGroups:      subjectGroupsMod,
+		Subjects:           subjectsMod,
 		Members:            membersMod,
+		MemberManagements:  memberManagementsMod,
 		MemberTeachers:     memberTeachersMod,
 		TeacherEducations:  teacherEducationsMod,
 		TeacherExperiences: teacherExperiencesMod,

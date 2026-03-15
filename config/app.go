@@ -2,16 +2,20 @@ package config
 
 import (
 	academicyears "eduflow/app/modules/academicyears"
+	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"eduflow/app/modules/example"
 	exampletwo "eduflow/app/modules/example-two"
 	"eduflow/app/modules/genders"
+	"eduflow/app/modules/membermanagements"
 	"eduflow/app/modules/members"
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/prefixes"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/subjectgroups"
+	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
 	"eduflow/app/modules/teacherexperiences"
 	"eduflow/app/modules/teacherrequests"
@@ -51,7 +55,11 @@ type Config struct {
 	Schools            schools.Config
 	Departments        departments.Config
 	AcademicYears      academicyears.Config
+	Classrooms         classrooms.Config
+	SubjectGroups      subjectgroups.Config
+	Subjects           subjects.Config
 	Members            members.Config
+	MemberManagements  membermanagements.Config
 	MemberTeachers     memberteachers.Config
 	TeacherEducations  teachereducations.Config
 	TeacherExperiences teacherexperiences.Config

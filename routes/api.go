@@ -85,6 +85,15 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 		members.PATCH("/:id", mod.Members.Ctl.MembersUpdate)
 		members.DELETE("/:id", mod.Members.Ctl.MembersDelete)
 
+		managements := members.Group("/managements")
+		{
+			managements.GET("", mod.MemberManagements.Ctl.MemberManagementsList)
+			managements.GET("/:id", mod.MemberManagements.Ctl.MemberManagementsInfo)
+			managements.POST("", mod.MemberManagements.Ctl.CreateMemberManagementController)
+			managements.PATCH("/:id", mod.MemberManagements.Ctl.MemberManagementsUpdate)
+			managements.DELETE("/:id", mod.MemberManagements.Ctl.MemberManagementsDelete)
+		}
+
 		teachers := members.Group("/teachers")
 		{
 			teachers.GET("", mod.MemberTeachers.Ctl.MemberTeachersList)
@@ -119,6 +128,40 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 			requests.POST("", mod.TeacherRequests.Ctl.CreateTeacherRequestController)
 			requests.PATCH("/:id", mod.TeacherRequests.Ctl.TeacherRequestsUpdate)
 			requests.DELETE("/:id", mod.TeacherRequests.Ctl.TeacherRequestsDelete)
+		}
+	}
+}
+
+func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
+	// Management routes (authentication required) e.g. for administrative tasks, etc.
+	management := r.Group("/management")
+	{
+		// Add management routes here
+		classrooms := management.Group("/classrooms")
+		{
+			classrooms.GET("", mod.Classrooms.Ctl.ClassroomsList)
+			classrooms.GET("/:id", mod.Classrooms.Ctl.ClassroomsInfo)
+			classrooms.POST("", mod.Classrooms.Ctl.CreateClassroomController)
+			classrooms.PATCH("/:id", mod.Classrooms.Ctl.ClassroomsUpdate)
+			classrooms.DELETE("/:id", mod.Classrooms.Ctl.ClassroomsDelete)
+		}
+
+		subjectGroups := management.Group("/subject-groups")
+		{
+			subjectGroups.GET("", mod.SubjectGroups.Ctl.SubjectGroupsList)
+			subjectGroups.GET("/:id", mod.SubjectGroups.Ctl.SubjectGroupsInfo)
+			subjectGroups.POST("", mod.SubjectGroups.Ctl.CreateSubjectGroupController)
+			subjectGroups.PATCH("/:id", mod.SubjectGroups.Ctl.SubjectGroupsUpdate)
+			subjectGroups.DELETE("/:id", mod.SubjectGroups.Ctl.SubjectGroupsDelete)
+		}
+
+		subjects := management.Group("/subjects")
+		{
+			subjects.GET("", mod.Subjects.Ctl.SubjectsList)
+			subjects.GET("/:id", mod.Subjects.Ctl.SubjectsInfo)
+			subjects.POST("", mod.Subjects.Ctl.CreateSubjectController)
+			subjects.PATCH("/:id", mod.Subjects.Ctl.SubjectsUpdate)
+			subjects.DELETE("/:id", mod.Subjects.Ctl.SubjectsDelete)
 		}
 	}
 }
