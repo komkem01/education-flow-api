@@ -209,6 +209,26 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 			healthProfiles.DELETE("/:id", mod.TeacherHealthProfiles.Ctl.TeacherHealthProfilesDelete)
 		}
 
+		documents := members.Group("/documents")
+		{
+			documents.GET("", mod.Documents.Ctl.DocumentsList)
+			documents.GET("/:id", mod.Documents.Ctl.DocumentsInfo)
+			documents.POST("", mod.Documents.Ctl.CreateDocumentController)
+			documents.POST("/presign-upload", mod.Documents.Ctl.DocumentsPresignUpload)
+			documents.GET("/presign-download", mod.Documents.Ctl.DocumentsPresignDownload)
+			documents.DELETE("/:id", mod.Documents.Ctl.DocumentsDelete)
+		}
+
+		pictures := members.Group("/pictures")
+		{
+			pictures.GET("", mod.Pictures.Ctl.PicturesList)
+			pictures.GET("/:id", mod.Pictures.Ctl.PicturesInfo)
+			pictures.POST("", mod.Pictures.Ctl.CreatePictureController)
+			pictures.POST("/presign-upload", mod.Pictures.Ctl.PicturesPresignUpload)
+			pictures.GET("/presign-download", mod.Pictures.Ctl.PicturesPresignDownload)
+			pictures.DELETE("/:id", mod.Pictures.Ctl.PicturesDelete)
+		}
+
 		emergencyContacts := members.Group("/teacher-emergency-contacts")
 		{
 			emergencyContacts.GET("", mod.TeacherEmergencyContacts.Ctl.TeacherEmergencyContactsList)
@@ -256,6 +276,14 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 		{
 			auditLogs.GET("", mod.AuditLogs.Ctl.AuditLogsList)
 			auditLogs.GET("/:id", mod.AuditLogs.Ctl.AuditLogsInfo)
+		}
+
+		storages := management.Group("/storages")
+		{
+			storages.GET("", mod.Storages.Ctl.StoragesList)
+			storages.GET("/:id", mod.Storages.Ctl.StoragesInfo)
+			storages.POST("", mod.Storages.Ctl.StoragesCreate)
+			storages.PATCH("/:id", mod.Storages.Ctl.StoragesUpdate)
 		}
 	}
 }

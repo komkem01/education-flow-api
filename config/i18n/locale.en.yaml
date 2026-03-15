@@ -14,3 +14,11 @@ invalid-request-reason: Request reason is required
 invalid-school-scope: Cross-school operation is not allowed
 audit-log-not-found: Audit log not found
 condition-fail: Request condition failed
+document-not-found: Document not found
+document-duplicate: Document already exists
+invalid-document-object-key: Invalid document object key
+picture-not-found: Picture not found
+picture-duplicate: Picture already exists
+invalid-picture-object-key: Invalid picture object key
+storage-not-found: Storage not found
+storage-duplicate: Storage already exists

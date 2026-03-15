@@ -10,6 +10,7 @@ import (
 	"eduflow/app/modules/auth"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
+	"eduflow/app/modules/documents"
 	"log/slog"
 	"sync"
 
@@ -23,10 +24,13 @@ import (
 	"eduflow/app/modules/members"
 	"eduflow/app/modules/memberstudents"
 	"eduflow/app/modules/memberteachers"
+	"eduflow/app/modules/pictures"
 	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/s3"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/storages"
 	"eduflow/app/modules/studentenrollments"
 	"eduflow/app/modules/studentguardians"
 	"eduflow/app/modules/studenthealthprofiles"
@@ -71,6 +75,10 @@ type Modules struct {
 	SubjectGroups             *subjectgroups.Module
 	Subjects                  *subjects.Module
 	AuditLogs                 *auditlogs.Module
+	S3                        *s3.Module
+	Storages                  *storages.Module
+	Documents                 *documents.Module
+	Pictures                  *pictures.Module
 	Auth                      *auth.Module
 	Approvals                 *approvals.Module
 	AttendanceSessions        *attendancesessions.Module
@@ -120,6 +128,10 @@ func modulesInit() {
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
 	auditLogsMod := auditlogs.New(config.Conf[auditlogs.Config](confMod.Svc), entitiesMod.Svc)
+	s3Mod := s3.New(config.Conf[s3.Config](confMod.Svc))
+	storagesMod := storages.New(config.Conf[storages.Config](confMod.Svc), entitiesMod.Svc)
+	documentsMod := documents.New(config.Conf[documents.Config](confMod.Svc), s3Mod.Svc, entitiesMod.Svc, entitiesMod.Svc)
+	picturesMod := pictures.New(config.Conf[pictures.Config](confMod.Svc), s3Mod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	authMod := auth.New(config.Conf[auth.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	approvalsMod := approvals.New(
 		config.Conf[approvals.Config](confMod.Svc),
@@ -170,6 +182,10 @@ func modulesInit() {
 		SubjectGroups:             subjectGroupsMod,
 		Subjects:                  subjectsMod,
 		AuditLogs:                 auditLogsMod,
+		S3:                        s3Mod,
+		Storages:                  storagesMod,
+		Documents:                 documentsMod,
+		Pictures:                  picturesMod,
 		Auth:                      authMod,
 		Approvals:                 approvalsMod,
 		AttendanceSessions:        attendanceSessionsMod,

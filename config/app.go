@@ -10,6 +10,7 @@ import (
 	"eduflow/app/modules/auth"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
+	"eduflow/app/modules/documents"
 	"eduflow/app/modules/enrollmentstatushistories"
 	"eduflow/app/modules/enrollmentsubjects"
 	"eduflow/app/modules/example"
@@ -20,10 +21,13 @@ import (
 	"eduflow/app/modules/members"
 	"eduflow/app/modules/memberstudents"
 	"eduflow/app/modules/memberteachers"
+	"eduflow/app/modules/pictures"
 	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/s3"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/storages"
 	"eduflow/app/modules/studentenrollments"
 	"eduflow/app/modules/studentguardians"
 	"eduflow/app/modules/studenthealthprofiles"
@@ -77,6 +81,10 @@ type Config struct {
 	SubjectGroups             subjectgroups.Config
 	Subjects                  subjects.Config
 	AuditLogs                 auditlogs.Config
+	S3                        s3.Config
+	Storages                  storages.Config
+	Documents                 documents.Config
+	Pictures                  pictures.Config
 	Auth                      auth.Config
 	Approvals                 approvals.Config
 	AttendanceSessions        attendancesessions.Config
