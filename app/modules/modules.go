@@ -1,11 +1,16 @@
 package modules
 
 import (
+	academicyears "eduflow/app/modules/academicyears"
 	"log/slog"
 	"sync"
 
 	"eduflow/app/modules/entities"
 	"eduflow/app/modules/example"
+	"eduflow/app/modules/genders"
+	"eduflow/app/modules/members"
+	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
 	"eduflow/internal/config"
@@ -28,8 +33,13 @@ type Modules struct {
 	DB     *database.DatabaseModule
 	ENT    *entities.Module
 	// Kafka *kafka.Module
-	Example  *example.Module
-	Example2 *exampletwo.Module
+	Example       *example.Module
+	Example2      *exampletwo.Module
+	Genders       *genders.Module
+	Prefixes      *prefixes.Module
+	Schools       *schools.Module
+	AcademicYears *academicyears.Module
+	Members       *members.Module
 }
 
 func modulesInit() {
@@ -47,17 +57,27 @@ func modulesInit() {
 	entitiesMod := entities.New(db.Svc.DB())
 	exampleMod := example.New(config.Conf[example.Config](confMod.Svc), entitiesMod.Svc)
 	exampleMod2 := exampletwo.New(config.Conf[exampletwo.Config](confMod.Svc), entitiesMod.Svc)
+	gendersMod := genders.New(config.Conf[genders.Config](confMod.Svc), entitiesMod.Svc)
+	prefixesMod := prefixes.New(config.Conf[prefixes.Config](confMod.Svc), entitiesMod.Svc)
+	schoolsMod := schools.New(config.Conf[schools.Config](confMod.Svc), entitiesMod.Svc)
+	academicYearsMod := academicyears.New(config.Conf[academicyears.Config](confMod.Svc), entitiesMod.Svc)
+	membersMod := members.New(config.Conf[members.Config](confMod.Svc), entitiesMod.Svc)
 	// kafka := kafka.New(&conf.Kafka)
 	mod = &Modules{
-		Conf:     confMod,
-		Specs:    specsMod,
-		Log:      logMod,
-		OTEL:     otel,
-		Sentry:   sentryMod,
-		DB:       db,
-		ENT:      entitiesMod,
-		Example:  exampleMod,
-		Example2: exampleMod2,
+		Conf:          confMod,
+		Specs:         specsMod,
+		Log:           logMod,
+		OTEL:          otel,
+		Sentry:        sentryMod,
+		DB:            db,
+		ENT:           entitiesMod,
+		Example:       exampleMod,
+		Example2:      exampleMod2,
+		Genders:       gendersMod,
+		Prefixes:      prefixesMod,
+		Schools:       schoolsMod,
+		AcademicYears: academicYearsMod,
+		Members:       membersMod,
 	}
 
 	log.Infof("all modules initialized")

@@ -1,8 +1,13 @@
 package config
 
 import (
+	academicyears "eduflow/app/modules/academicyears"
 	"eduflow/app/modules/example"
 	exampletwo "eduflow/app/modules/example-two"
+	"eduflow/app/modules/genders"
+	"eduflow/app/modules/members"
+	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
 	"eduflow/internal/kafka"
@@ -35,7 +40,12 @@ type Config struct {
 
 	Example example.Config
 
-	ExampleTwo exampletwo.Config
+	ExampleTwo    exampletwo.Config
+	Genders       genders.Config
+	Prefixes      prefixes.Config
+	Schools       schools.Config
+	AcademicYears academicyears.Config
+	Members       members.Config
 }
 
 var App = Config{
