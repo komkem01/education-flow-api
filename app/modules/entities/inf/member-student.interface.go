@@ -11,6 +11,7 @@ import (
 
 type MemberStudentEntity interface {
 	CreateMemberStudent(ctx context.Context, data *ent.MemberStudent) (*ent.MemberStudent, error)
+	RegisterStudent(ctx context.Context, data *ent.StudentRegistrationInput) (*ent.StudentRegistrationResult, error)
 	GetMemberStudentByID(ctx context.Context, id uuid.UUID) (*ent.MemberStudent, error)
 	ListMemberStudents(ctx context.Context, req *base.RequestPaginate, isActive *bool, schoolID *uuid.UUID, advisorTeacherID *uuid.UUID) ([]*ent.MemberStudent, *base.ResponsePaginate, error)
 	UpdateMemberStudentByID(ctx context.Context, id uuid.UUID, data *ent.MemberStudentUpdate) (*ent.MemberStudent, error)

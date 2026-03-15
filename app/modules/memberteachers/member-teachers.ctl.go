@@ -25,6 +25,16 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 		base.BadRequest(ctx, "member-teacher-not-found", nil)
 	case errors.Is(err, ErrMemberTeacherUnauthorized):
 		base.Unauthorized(ctx, "unauthorized", nil)
+	case errors.Is(err, ErrTeacherInvalidEmail):
+		base.ValidateFailed(ctx, "invalid-email", nil)
+	case errors.Is(err, ErrTeacherInvalidPassword):
+		base.ValidateFailed(ctx, "invalid-password", nil)
+	case errors.Is(err, ErrTeacherInvalidCitizenID):
+		base.ValidateFailed(ctx, "invalid-citizen-id", nil)
+	case errors.Is(err, ErrTeacherInvalidPhone):
+		base.ValidateFailed(ctx, "invalid-phone", nil)
+	case errors.Is(err, ErrTeacherInvalidDateRange):
+		base.ValidateFailed(ctx, "invalid-date-range", nil)
 	case errors.Is(err, ErrMemberTeacherConditionFail):
 		base.ValidateFailed(ctx, "condition-fail", nil)
 	case errors.Is(err, ErrMemberTeacherDuplicate):

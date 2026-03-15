@@ -30,3 +30,29 @@ type MemberManagementUpdate struct {
 	DepartmentID  *uuid.UUID
 	IsActive      *bool
 }
+
+type ManagementRegistrationInput struct {
+	MemberEmail        string
+	MemberPasswordHash string
+	MemberSchoolID     uuid.UUID
+	MemberRole         MemberRole
+	MemberIsActive     bool
+	MemberLastLogin    *time.Time
+
+	ManagementEmployeeCode  string
+	ManagementPosition      string
+	ManagementStartWorkDate time.Time
+	ManagementDepartmentID  uuid.UUID
+	ManagementIsActive      bool
+
+	RequestedBy     uuid.UUID
+	RequestedByRole ApprovalActorRole
+	RequestReason   *string
+}
+
+type ManagementRegistrationResult struct {
+	Member         *Member
+	Management     *MemberManagement
+	Approval       *ApprovalRequest
+	ApprovalAction *ApprovalAction
+}

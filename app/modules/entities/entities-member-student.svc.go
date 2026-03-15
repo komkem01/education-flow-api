@@ -3,6 +3,7 @@ package entities
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"eduflow/app/modules/entities/ent"
 	entitiesinf "eduflow/app/modules/entities/inf"
@@ -19,6 +20,113 @@ func (s *Service) CreateMemberStudent(ctx context.Context, data *ent.MemberStude
 		return nil, err
 	}
 	return data, nil
+}
+
+func (s *Service) RegisterStudent(ctx context.Context, data *ent.StudentRegistrationInput) (*ent.StudentRegistrationResult, error) {
+	result := new(ent.StudentRegistrationResult)
+
+	err := s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		member := &ent.Member{
+			SchoolID:  data.MemberSchoolID,
+			Email:     data.MemberEmail,
+			Password:  data.MemberPasswordHash,
+			Role:      data.MemberRole,
+			IsActive:  data.MemberIsActive,
+			LastLogin: data.MemberLastLogin,
+		}
+		if _, err := tx.NewInsert().Model(member).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		student := &ent.MemberStudent{
+			MemberID:         member.ID,
+			SchoolID:         data.StudentSchoolID,
+			GenderID:         data.StudentGenderID,
+			PrefixID:         data.StudentPrefixID,
+			AdvisorTeacherID: data.StudentAdvisorTeacherID,
+			StudentCode:      data.StudentCode,
+			FirstNameTH:      data.StudentFirstNameTH,
+			LastNameTH:       data.StudentLastNameTH,
+			FirstNameEN:      data.StudentFirstNameEN,
+			LastNameEN:       data.StudentLastNameEN,
+			CitizenID:        data.StudentCitizenID,
+			Phone:            data.StudentPhone,
+			IsActive:         data.StudentIsActive,
+		}
+		if _, err := tx.NewInsert().Model(student).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		profile := &ent.StudentProfile{
+			StudentID:             student.ID,
+			BirthDate:             data.ProfileBirthDate,
+			Nationality:           data.ProfileNationality,
+			Religion:              data.ProfileReligion,
+			AddressCurrent:        data.ProfileAddressCurrent,
+			AddressRegistered:     data.ProfileAddressRegistered,
+			EmergencyContactName:  data.ProfileEmergencyContactName,
+			EmergencyContactPhone: data.ProfileEmergencyContactPhone,
+		}
+		if _, err := tx.NewInsert().Model(profile).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		result.Member = member
+		result.Student = student
+		result.Profile = profile
+
+		if data.RequireApproval {
+			now := time.Now()
+			subjectID := student.ID
+			approval := &ent.ApprovalRequest{
+				RequestType:     "student_registration",
+				SubjectType:     "member_student",
+				SubjectID:       &subjectID,
+				RequestedBy:     data.RequestedBy,
+				RequestedByRole: data.RequestedByRole,
+				Payload: map[string]any{
+					"member_id":    member.ID.String(),
+					"student_id":   student.ID.String(),
+					"student_code": student.StudentCode,
+					"school_id":    student.SchoolID.String(),
+				},
+				CurrentStatus: ent.ApprovalRequestStatusPending,
+				SubmittedAt:   &now,
+			}
+			if data.RequestReason != nil && *data.RequestReason != "" {
+				approval.Payload["reason"] = *data.RequestReason
+			}
+			if _, err := tx.NewInsert().Model(approval).Returning("*").Exec(ctx); err != nil {
+				return err
+			}
+
+			action := &ent.ApprovalAction{
+				RequestID:   approval.ID,
+				Action:      ent.ApprovalActionTypeSubmit,
+				ActedBy:     data.RequestedBy,
+				ActedByRole: data.RequestedByRole,
+				Comment:     data.RequestReason,
+				Metadata: map[string]any{
+					"source":     "memberstudents.register",
+					"student_id": student.ID.String(),
+				},
+				CreatedAt: now,
+			}
+			if _, err := tx.NewInsert().Model(action).Returning("*").Exec(ctx); err != nil {
+				return err
+			}
+
+			result.Approval = approval
+			result.ApprovalAction = action
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (s *Service) GetMemberStudentByID(ctx context.Context, id uuid.UUID) (*ent.MemberStudent, error) {

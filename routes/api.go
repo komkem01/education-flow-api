@@ -70,14 +70,21 @@ func apiPublic(r *gin.RouterGroup, mod *modules.Modules) {
 	// Public routes (no authentication required) e.g. for login, registration, etc.
 	public := r.Group("/public")
 	{
-		public.POST("/example", mod.Example.Ctl.Create)
+		auth := public.Group("/auth")
+		{
+			auth.POST("/login", mod.Auth.Ctl.AuthLogin)
+			auth.POST("/refresh", mod.Auth.Ctl.AuthRefresh)
+		}
 	}
 }
 
 func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 	// Protected routes (authentication required)
-	members := r.Group("/member")
+	members := r.Group("/member", mod.Auth.Ctl.RequireAuth())
 	{
+		members.GET("/me", mod.Auth.Ctl.AuthMe)
+		members.POST("/logout", mod.Auth.Ctl.AuthLogout)
+		members.POST("/logout-all", mod.Auth.Ctl.AuthLogoutAll)
 
 		members.GET("", mod.Members.Ctl.MembersList)
 		members.GET("/:id", mod.Members.Ctl.MembersInfo)
@@ -215,7 +222,7 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 
 func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 	// Management routes (authentication required) e.g. for administrative tasks, etc.
-	management := r.Group("/management")
+	management := r.Group("/management", mod.Auth.Ctl.RequireAuth())
 	{
 		// Add management routes here
 		classrooms := management.Group("/classrooms")
@@ -249,7 +256,7 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 
 func apiEnrollments(r *gin.RouterGroup, mod *modules.Modules) {
 	// Enrollment routes (authentication required) e.g. for student enrollments, etc.
-	enrollments := r.Group("/enrollments")
+	enrollments := r.Group("/enrollments", mod.Auth.Ctl.RequireAuth())
 	{
 		studentEnrollments := enrollments.Group("/student-enrollments")
 		{
@@ -282,7 +289,7 @@ func apiEnrollments(r *gin.RouterGroup, mod *modules.Modules) {
 
 func apiAttendance(r *gin.RouterGroup, mod *modules.Modules) {
 	// Attendance routes (authentication required) e.g. for student attendance, etc.
-	attendance := r.Group("/attendance")
+	attendance := r.Group("/attendance", mod.Auth.Ctl.RequireAuth())
 	{
 		sessions := attendance.Group("/sessions")
 		{
@@ -316,7 +323,7 @@ func apiAttendance(r *gin.RouterGroup, mod *modules.Modules) {
 }
 
 func apiApproval(r *gin.RouterGroup, mod *modules.Modules) {
-	approval := r.Group("/approval")
+	approval := r.Group("/approval", mod.Auth.Ctl.RequireAuth())
 	{
 		requests := approval.Group("/requests")
 		{

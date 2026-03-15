@@ -2,3 +2,13 @@ success: สำเร็จ
 internal-error: เกิดข้อผิดพลาดจากเซิร์ฟเวอร์
 invalid-request-form: กรอกข้อมูลไม่ถูกต้อง
 example-message-ok: โอเค
+invalid-email: อีเมลไม่ถูกต้อง
+invalid-password: รหัสผ่านไม่ถูกต้อง (อย่างน้อย 8 ตัวอักษร)
+invalid-citizen-id: เลขบัตรประชาชนไม่ถูกต้อง
+invalid-phone: เบอร์โทรศัพท์ไม่ถูกต้อง
+invalid-birth-date: วันเกิดไม่ถูกต้อง
+invalid-name-pair: กรุณาระบุชื่อภาษาอังกฤษและนามสกุลภาษาอังกฤษให้ครบทั้งคู่
+invalid-approval-reason: กรุณาระบุเหตุผลการขออนุมัติ
+invalid-date-range: ช่วงวันที่ไม่ถูกต้อง
+invalid-request-reason: กรุณาระบุเหตุผลคำขอ
+invalid-school-scope: ไม่สามารถดำเนินการข้ามโรงเรียนได้

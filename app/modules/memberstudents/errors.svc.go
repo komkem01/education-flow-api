@@ -12,6 +12,13 @@ var (
 	ErrMemberStudentDuplicate     = errors.New("member-student-duplicate")
 	ErrMemberStudentUnauthorized  = errors.New("member-student-unauthorized")
 	ErrMemberStudentConditionFail = errors.New("member-student-condition-fail")
+	ErrInvalidEmail               = errors.New("invalid-email")
+	ErrInvalidPassword            = errors.New("invalid-password")
+	ErrInvalidCitizenID           = errors.New("invalid-citizen-id")
+	ErrInvalidPhone               = errors.New("invalid-phone")
+	ErrInvalidBirthDate           = errors.New("invalid-birth-date")
+	ErrInvalidNamePair            = errors.New("invalid-name-pair")
+	ErrInvalidApprovalReason      = errors.New("invalid-approval-reason")
 )
 
 func normalizeServiceError(err error) error {

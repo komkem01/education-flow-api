@@ -6,6 +6,7 @@ import (
 	"eduflow/app/modules/attendancerecordlogs"
 	"eduflow/app/modules/attendancerecords"
 	"eduflow/app/modules/attendancesessions"
+	"eduflow/app/modules/auth"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"eduflow/app/modules/enrollmentstatushistories"
@@ -74,6 +75,7 @@ type Config struct {
 	Classrooms                classrooms.Config
 	SubjectGroups             subjectgroups.Config
 	Subjects                  subjects.Config
+	Auth                      auth.Config
 	Approvals                 approvals.Config
 	AttendanceSessions        attendancesessions.Config
 	AttendanceRecords         attendancerecords.Config

@@ -12,6 +12,11 @@ var (
 	ErrMemberTeacherDuplicate     = errors.New("member-teacher-duplicate")
 	ErrMemberTeacherUnauthorized  = errors.New("member-teacher-unauthorized")
 	ErrMemberTeacherConditionFail = errors.New("member-teacher-condition-fail")
+	ErrTeacherInvalidEmail        = errors.New("invalid-email")
+	ErrTeacherInvalidPassword     = errors.New("invalid-password")
+	ErrTeacherInvalidCitizenID    = errors.New("invalid-citizen-id")
+	ErrTeacherInvalidPhone        = errors.New("invalid-phone")
+	ErrTeacherInvalidDateRange    = errors.New("invalid-date-range")
 )
 
 func normalizeServiceError(err error) error {

@@ -12,6 +12,9 @@ var (
 	ErrMemberManagementDuplicate     = errors.New("member-management-duplicate")
 	ErrMemberManagementUnauthorized  = errors.New("member-management-unauthorized")
 	ErrMemberManagementConditionFail = errors.New("member-management-condition-fail")
+	ErrManagementInvalidEmail        = errors.New("invalid-email")
+	ErrManagementInvalidPassword     = errors.New("invalid-password")
+	ErrManagementInvalidReason       = errors.New("invalid-request-reason")
 )
 
 func normalizeServiceError(err error) error {

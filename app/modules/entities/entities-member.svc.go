@@ -41,6 +41,15 @@ func (s *Service) GetMemberByID(ctx context.Context, id uuid.UUID) (*ent.Member,
 	return item, nil
 }
 
+func (s *Service) GetMemberByEmail(ctx context.Context, email string) (*ent.Member, error) {
+	item := new(ent.Member)
+	if err := s.db.NewSelect().Model(item).Where("email = ?", email).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 func (s *Service) ListMembers(ctx context.Context, req *base.RequestPaginate, isActive *bool, schoolID *uuid.UUID, role *ent.MemberRole) ([]*ent.Member, *base.ResponsePaginate, error) {
 	if req == nil {
 		req = &base.RequestPaginate{}

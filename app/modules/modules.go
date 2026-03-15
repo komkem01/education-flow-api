@@ -6,6 +6,7 @@ import (
 	"eduflow/app/modules/attendancerecordlogs"
 	"eduflow/app/modules/attendancerecords"
 	"eduflow/app/modules/attendancesessions"
+	"eduflow/app/modules/auth"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"log/slog"
@@ -68,6 +69,7 @@ type Modules struct {
 	Classrooms                *classrooms.Module
 	SubjectGroups             *subjectgroups.Module
 	Subjects                  *subjects.Module
+	Auth                      *auth.Module
 	Approvals                 *approvals.Module
 	AttendanceSessions        *attendancesessions.Module
 	AttendanceRecords         *attendancerecords.Module
@@ -115,6 +117,7 @@ func modulesInit() {
 	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
+	authMod := auth.New(config.Conf[auth.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	approvalsMod := approvals.New(config.Conf[approvals.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	attendanceSessionsMod := attendancesessions.New(config.Conf[attendancesessions.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordsMod := attendancerecords.New(config.Conf[attendancerecords.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
@@ -156,6 +159,7 @@ func modulesInit() {
 		Classrooms:                classroomsMod,
 		SubjectGroups:             subjectGroupsMod,
 		Subjects:                  subjectsMod,
+		Auth:                      authMod,
 		Approvals:                 approvalsMod,
 		AttendanceSessions:        attendanceSessionsMod,
 		AttendanceRecords:         attendanceRecordsMod,

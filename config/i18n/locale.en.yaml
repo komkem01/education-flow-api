@@ -2,3 +2,13 @@ success: Success
 internal-error: Internal server error
 invalid-request-form: Invalid request form
 example-message-ok: Example message ok
+invalid-email: Invalid email address
+invalid-password: Invalid password (minimum 8 characters)
+invalid-citizen-id: Invalid citizen ID
+invalid-phone: Invalid phone number
+invalid-birth-date: Invalid birth date
+invalid-name-pair: Please provide both English first name and English last name
+invalid-approval-reason: Approval reason is required
+invalid-date-range: Invalid date range
+invalid-request-reason: Request reason is required
+invalid-school-scope: Cross-school operation is not allowed

@@ -3,6 +3,7 @@ package entities
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"eduflow/app/modules/entities/ent"
 	entitiesinf "eduflow/app/modules/entities/inf"
@@ -19,6 +20,88 @@ func (s *Service) CreateMemberManagement(ctx context.Context, data *ent.MemberMa
 		return nil, err
 	}
 	return data, nil
+}
+
+func (s *Service) RegisterManagement(ctx context.Context, data *ent.ManagementRegistrationInput) (*ent.ManagementRegistrationResult, error) {
+	result := new(ent.ManagementRegistrationResult)
+
+	err := s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		member := &ent.Member{
+			SchoolID:  data.MemberSchoolID,
+			Email:     data.MemberEmail,
+			Password:  data.MemberPasswordHash,
+			Role:      data.MemberRole,
+			IsActive:  data.MemberIsActive,
+			LastLogin: data.MemberLastLogin,
+		}
+		if _, err := tx.NewInsert().Model(member).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		management := &ent.MemberManagement{
+			MemberID:      member.ID,
+			EmployeeCode:  data.ManagementEmployeeCode,
+			Position:      data.ManagementPosition,
+			StartWorkDate: data.ManagementStartWorkDate,
+			DepartmentID:  data.ManagementDepartmentID,
+			IsActive:      data.ManagementIsActive,
+		}
+		if _, err := tx.NewInsert().Model(management).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		now := time.Now()
+		subjectID := management.ID
+		approval := &ent.ApprovalRequest{
+			RequestType:     "management_registration",
+			SubjectType:     "member_management",
+			SubjectID:       &subjectID,
+			RequestedBy:     data.RequestedBy,
+			RequestedByRole: data.RequestedByRole,
+			Payload: map[string]any{
+				"member_id":     member.ID.String(),
+				"management_id": management.ID.String(),
+				"employee_code": management.EmployeeCode,
+				"department_id": management.DepartmentID.String(),
+				"target_role":   string(member.Role),
+			},
+			CurrentStatus: ent.ApprovalRequestStatusPending,
+			SubmittedAt:   &now,
+		}
+		if data.RequestReason != nil && *data.RequestReason != "" {
+			approval.Payload["reason"] = *data.RequestReason
+		}
+		if _, err := tx.NewInsert().Model(approval).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		action := &ent.ApprovalAction{
+			RequestID:   approval.ID,
+			Action:      ent.ApprovalActionTypeSubmit,
+			ActedBy:     data.RequestedBy,
+			ActedByRole: data.RequestedByRole,
+			Comment:     data.RequestReason,
+			Metadata: map[string]any{
+				"source":        "membermanagements.register",
+				"management_id": management.ID.String(),
+			},
+			CreatedAt: now,
+		}
+		if _, err := tx.NewInsert().Model(action).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		result.Member = member
+		result.Management = management
+		result.Approval = approval
+		result.ApprovalAction = action
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (s *Service) GetMemberManagementByID(ctx context.Context, id uuid.UUID) (*ent.MemberManagement, error) {

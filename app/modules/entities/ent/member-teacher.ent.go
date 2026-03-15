@@ -50,3 +50,33 @@ type MemberTeacherUpdate struct {
 	EndDate          *time.Time
 	IsActive         *bool
 }
+
+type TeacherRegistrationInput struct {
+	MemberEmail        string
+	MemberPasswordHash string
+	MemberSchoolID     uuid.UUID
+	MemberRole         MemberRole
+	MemberIsActive     bool
+	MemberLastLogin    *time.Time
+
+	TeacherGenderID         uuid.UUID
+	TeacherPrefixID         uuid.UUID
+	TeacherCode             string
+	TeacherCitizenID        string
+	TeacherFirstNameTH      string
+	TeacherLastNameTH       string
+	TeacherFirstNameEN      string
+	TeacherLastNameEN       string
+	TeacherPhone            string
+	TeacherPosition         string
+	TeacherAcademicStanding string
+	TeacherDepartmentID     uuid.UUID
+	TeacherStartDate        time.Time
+	TeacherEndDate          *time.Time
+	TeacherIsActive         bool
+}
+
+type TeacherRegistrationResult struct {
+	Member  *Member
+	Teacher *MemberTeacher
+}

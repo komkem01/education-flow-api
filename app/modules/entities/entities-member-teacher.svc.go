@@ -22,6 +22,55 @@ func (s *Service) CreateMemberTeacher(ctx context.Context, teacher *ent.MemberTe
 	return teacher, nil
 }
 
+func (s *Service) RegisterTeacher(ctx context.Context, data *ent.TeacherRegistrationInput) (*ent.TeacherRegistrationResult, error) {
+	result := new(ent.TeacherRegistrationResult)
+
+	err := s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		member := &ent.Member{
+			SchoolID:  data.MemberSchoolID,
+			Email:     data.MemberEmail,
+			Password:  data.MemberPasswordHash,
+			Role:      data.MemberRole,
+			IsActive:  data.MemberIsActive,
+			LastLogin: data.MemberLastLogin,
+		}
+		if _, err := tx.NewInsert().Model(member).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		teacher := &ent.MemberTeacher{
+			MemberID:         member.ID,
+			GenderID:         data.TeacherGenderID,
+			PrefixID:         data.TeacherPrefixID,
+			Code:             data.TeacherCode,
+			CitizenID:        data.TeacherCitizenID,
+			FirstNameTH:      data.TeacherFirstNameTH,
+			LastNameTH:       data.TeacherLastNameTH,
+			FirstNameEN:      data.TeacherFirstNameEN,
+			LastNameEN:       data.TeacherLastNameEN,
+			Phone:            data.TeacherPhone,
+			Position:         data.TeacherPosition,
+			AcademicStanding: data.TeacherAcademicStanding,
+			DepartmentID:     data.TeacherDepartmentID,
+			StartDate:        data.TeacherStartDate,
+			EndDate:          data.TeacherEndDate,
+			IsActive:         data.TeacherIsActive,
+		}
+		if _, err := tx.NewInsert().Model(teacher).Returning("*").Exec(ctx); err != nil {
+			return err
+		}
+
+		result.Member = member
+		result.Teacher = teacher
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (s *Service) GetMemberTeacherByID(ctx context.Context, id uuid.UUID) (*ent.MemberTeacher, error) {
 	teacher := new(ent.MemberTeacher)
 	if err := s.db.NewSelect().Model(teacher).Where("id = ?", id).Scan(ctx); err != nil {

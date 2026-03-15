@@ -44,3 +44,46 @@ type MemberStudentUpdate struct {
 	Phone            *string
 	IsActive         *bool
 }
+
+type StudentRegistrationInput struct {
+	MemberEmail        string
+	MemberPasswordHash string
+	MemberSchoolID     uuid.UUID
+	MemberRole         MemberRole
+	MemberIsActive     bool
+	MemberLastLogin    *time.Time
+
+	StudentSchoolID         uuid.UUID
+	StudentGenderID         uuid.UUID
+	StudentPrefixID         uuid.UUID
+	StudentAdvisorTeacherID *uuid.UUID
+	StudentCode             string
+	StudentFirstNameTH      string
+	StudentLastNameTH       string
+	StudentFirstNameEN      *string
+	StudentLastNameEN       *string
+	StudentCitizenID        *string
+	StudentPhone            *string
+	StudentIsActive         bool
+
+	ProfileBirthDate             *time.Time
+	ProfileNationality           *string
+	ProfileReligion              *string
+	ProfileAddressCurrent        *string
+	ProfileAddressRegistered     *string
+	ProfileEmergencyContactName  *string
+	ProfileEmergencyContactPhone *string
+
+	RequireApproval bool
+	RequestedBy     uuid.UUID
+	RequestedByRole ApprovalActorRole
+	RequestReason   *string
+}
+
+type StudentRegistrationResult struct {
+	Member         *Member
+	Student        *MemberStudent
+	Profile        *StudentProfile
+	Approval       *ApprovalRequest
+	ApprovalAction *ApprovalAction
+}
