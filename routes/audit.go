@@ -3,9 +3,13 @@ package routes
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +19,7 @@ import (
 	entitiesinf "eduflow/app/modules/entities/inf"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -122,6 +127,9 @@ func AuditLogMiddleware(auditEnt entitiesinf.AuditLogEntity) gin.HandlerFunc {
 			auditLog.ActorID = &currentUser.Member.ID
 			role := string(currentUser.Member.Role)
 			auditLog.ActorRole = &role
+		} else if actorID, actorRole := parseActorFromBearer(ctx.GetHeader("Authorization")); actorID != nil {
+			auditLog.ActorID = actorID
+			auditLog.ActorRole = actorRole
 		}
 
 		if spanCtx := trace.SpanContextFromContext(ctx.Request.Context()); spanCtx.IsValid() {
@@ -252,4 +260,75 @@ func strPtr(v string) *string {
 		return nil
 	}
 	return &v
+}
+
+type auditAccessClaims struct {
+	Sub  string `json:"sub"`
+	Role string `json:"role"`
+}
+
+func parseActorFromBearer(bearer string) (*uuid.UUID, *string) {
+	token := extractBearerToken(bearer)
+	if token == "" {
+		return nil, nil
+	}
+
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return nil, nil
+	}
+
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return nil, nil
+	}
+
+	unsigned := parts[0] + "." + parts[1]
+	if !isValidTokenSignature(unsigned, parts[2], secret) {
+		return nil, nil
+	}
+
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, nil
+	}
+
+	claims := new(auditAccessClaims)
+	if err := json.Unmarshal(payload, claims); err != nil {
+		return nil, nil
+	}
+
+	parsedID, err := uuid.Parse(strings.TrimSpace(claims.Sub))
+	if err != nil {
+		return nil, nil
+	}
+
+	var role *string
+	if strings.TrimSpace(claims.Role) != "" {
+		r := claims.Role
+		role = &r
+	}
+
+	return &parsedID, role
+}
+
+func extractBearerToken(v string) string {
+	if v == "" {
+		return ""
+	}
+	parts := strings.SplitN(strings.TrimSpace(v), " ", 2)
+	if len(parts) != 2 {
+		return ""
+	}
+	if !strings.EqualFold(parts[0], "Bearer") {
+		return ""
+	}
+	return strings.TrimSpace(parts[1])
+}
+
+func isValidTokenSignature(unsigned string, sig string, secret string) bool {
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(unsigned))
+	expected := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	return hmac.Equal([]byte(sig), []byte(expected))
 }
