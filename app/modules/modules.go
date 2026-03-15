@@ -10,18 +10,27 @@ import (
 	"eduflow/app/modules/entities"
 	"eduflow/app/modules/example"
 	"eduflow/app/modules/genders"
+	"eduflow/app/modules/memberguardians"
 	"eduflow/app/modules/membermanagements"
 	"eduflow/app/modules/members"
+	"eduflow/app/modules/memberstudents"
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/prefixes"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/studentguardians"
+	"eduflow/app/modules/studenthealthprofiles"
+	"eduflow/app/modules/studentprofiles"
 	"eduflow/app/modules/subjectgroups"
 	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
+	"eduflow/app/modules/teacheremergencycontacts"
 	"eduflow/app/modules/teacherexperiences"
+	"eduflow/app/modules/teacherhealthprofiles"
+	"eduflow/app/modules/teacherlicenses"
 	"eduflow/app/modules/teacherrequests"
+	"eduflow/app/modules/teachersubjects"
 	"eduflow/internal/config"
 	"eduflow/internal/database"
 	"eduflow/internal/log"
@@ -42,22 +51,31 @@ type Modules struct {
 	DB     *database.DatabaseModule
 	ENT    *entities.Module
 	// Kafka *kafka.Module
-	Example            *example.Module
-	Example2           *exampletwo.Module
-	Genders            *genders.Module
-	Prefixes           *prefixes.Module
-	Schools            *schools.Module
-	Departments        *departments.Module
-	AcademicYears      *academicyears.Module
-	Classrooms         *classrooms.Module
-	SubjectGroups      *subjectgroups.Module
-	Subjects           *subjects.Module
-	Members            *members.Module
-	MemberManagements  *membermanagements.Module
-	MemberTeachers     *memberteachers.Module
-	TeacherEducations  *teachereducations.Module
-	TeacherExperiences *teacherexperiences.Module
-	TeacherRequests    *teacherrequests.Module
+	Example                  *example.Module
+	Example2                 *exampletwo.Module
+	Genders                  *genders.Module
+	Prefixes                 *prefixes.Module
+	Schools                  *schools.Module
+	Departments              *departments.Module
+	AcademicYears            *academicyears.Module
+	Classrooms               *classrooms.Module
+	SubjectGroups            *subjectgroups.Module
+	Subjects                 *subjects.Module
+	Members                  *members.Module
+	MemberStudents           *memberstudents.Module
+	MemberGuardians          *memberguardians.Module
+	StudentGuardians         *studentguardians.Module
+	StudentProfiles          *studentprofiles.Module
+	StudentHealthProfiles    *studenthealthprofiles.Module
+	MemberManagements        *membermanagements.Module
+	MemberTeachers           *memberteachers.Module
+	TeacherEducations        *teachereducations.Module
+	TeacherEmergencyContacts *teacheremergencycontacts.Module
+	TeacherLicenses          *teacherlicenses.Module
+	TeacherExperiences       *teacherexperiences.Module
+	TeacherHealthProfiles    *teacherhealthprofiles.Module
+	TeacherRequests          *teacherrequests.Module
+	TeacherSubjects          *teachersubjects.Module
 }
 
 func modulesInit() {
@@ -84,36 +102,54 @@ func modulesInit() {
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
 	membersMod := members.New(config.Conf[members.Config](confMod.Svc), entitiesMod.Svc)
+	memberStudentsMod := memberstudents.New(config.Conf[memberstudents.Config](confMod.Svc), entitiesMod.Svc)
+	memberGuardiansMod := memberguardians.New(config.Conf[memberguardians.Config](confMod.Svc), entitiesMod.Svc)
+	studentGuardiansMod := studentguardians.New(config.Conf[studentguardians.Config](confMod.Svc), entitiesMod.Svc)
+	studentProfilesMod := studentprofiles.New(config.Conf[studentprofiles.Config](confMod.Svc), entitiesMod.Svc)
+	studentHealthProfilesMod := studenthealthprofiles.New(config.Conf[studenthealthprofiles.Config](confMod.Svc), entitiesMod.Svc)
 	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc)
 	memberTeachersMod := memberteachers.New(config.Conf[memberteachers.Config](confMod.Svc), entitiesMod.Svc)
 	teacherEducationsMod := teachereducations.New(config.Conf[teachereducations.Config](confMod.Svc), entitiesMod.Svc)
+	teacherEmergencyContactsMod := teacheremergencycontacts.New(config.Conf[teacheremergencycontacts.Config](confMod.Svc), entitiesMod.Svc)
+	teacherLicensesMod := teacherlicenses.New(config.Conf[teacherlicenses.Config](confMod.Svc), entitiesMod.Svc)
 	teacherExperiencesMod := teacherexperiences.New(config.Conf[teacherexperiences.Config](confMod.Svc), entitiesMod.Svc)
+	teacherHealthProfilesMod := teacherhealthprofiles.New(config.Conf[teacherhealthprofiles.Config](confMod.Svc), entitiesMod.Svc)
 	teacherRequestsMod := teacherrequests.New(config.Conf[teacherrequests.Config](confMod.Svc), entitiesMod.Svc)
+	teacherSubjectsMod := teachersubjects.New(config.Conf[teachersubjects.Config](confMod.Svc), entitiesMod.Svc)
 	// kafka := kafka.New(&conf.Kafka)
 	mod = &Modules{
-		Conf:               confMod,
-		Specs:              specsMod,
-		Log:                logMod,
-		OTEL:               otel,
-		Sentry:             sentryMod,
-		DB:                 db,
-		ENT:                entitiesMod,
-		Example:            exampleMod,
-		Example2:           exampleMod2,
-		Genders:            gendersMod,
-		Prefixes:           prefixesMod,
-		Schools:            schoolsMod,
-		Departments:        departmentsMod,
-		AcademicYears:      academicYearsMod,
-		Classrooms:         classroomsMod,
-		SubjectGroups:      subjectGroupsMod,
-		Subjects:           subjectsMod,
-		Members:            membersMod,
-		MemberManagements:  memberManagementsMod,
-		MemberTeachers:     memberTeachersMod,
-		TeacherEducations:  teacherEducationsMod,
-		TeacherExperiences: teacherExperiencesMod,
-		TeacherRequests:    teacherRequestsMod,
+		Conf:                     confMod,
+		Specs:                    specsMod,
+		Log:                      logMod,
+		OTEL:                     otel,
+		Sentry:                   sentryMod,
+		DB:                       db,
+		ENT:                      entitiesMod,
+		Example:                  exampleMod,
+		Example2:                 exampleMod2,
+		Genders:                  gendersMod,
+		Prefixes:                 prefixesMod,
+		Schools:                  schoolsMod,
+		Departments:              departmentsMod,
+		AcademicYears:            academicYearsMod,
+		Classrooms:               classroomsMod,
+		SubjectGroups:            subjectGroupsMod,
+		Subjects:                 subjectsMod,
+		Members:                  membersMod,
+		MemberStudents:           memberStudentsMod,
+		MemberGuardians:          memberGuardiansMod,
+		StudentGuardians:         studentGuardiansMod,
+		StudentProfiles:          studentProfilesMod,
+		StudentHealthProfiles:    studentHealthProfilesMod,
+		MemberManagements:        memberManagementsMod,
+		MemberTeachers:           memberTeachersMod,
+		TeacherEducations:        teacherEducationsMod,
+		TeacherEmergencyContacts: teacherEmergencyContactsMod,
+		TeacherLicenses:          teacherLicensesMod,
+		TeacherExperiences:       teacherExperiencesMod,
+		TeacherHealthProfiles:    teacherHealthProfilesMod,
+		TeacherRequests:          teacherRequestsMod,
+		TeacherSubjects:          teacherSubjectsMod,
 	}
 
 	log.Infof("all modules initialized")

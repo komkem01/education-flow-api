@@ -85,6 +85,51 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 		members.PATCH("/:id", mod.Members.Ctl.MembersUpdate)
 		members.DELETE("/:id", mod.Members.Ctl.MembersDelete)
 
+		students := members.Group("/students")
+		{
+			students.GET("", mod.MemberStudents.Ctl.MemberStudentsList)
+			students.GET("/:id", mod.MemberStudents.Ctl.MemberStudentsInfo)
+			students.POST("", mod.MemberStudents.Ctl.CreateMemberStudentController)
+			students.PATCH("/:id", mod.MemberStudents.Ctl.MemberStudentsUpdate)
+			students.DELETE("/:id", mod.MemberStudents.Ctl.MemberStudentsDelete)
+		}
+
+		guardians := members.Group("/guardians")
+		{
+			guardians.GET("", mod.MemberGuardians.Ctl.MemberGuardiansList)
+			guardians.GET("/:id", mod.MemberGuardians.Ctl.MemberGuardiansInfo)
+			guardians.POST("", mod.MemberGuardians.Ctl.CreateMemberGuardianController)
+			guardians.PATCH("/:id", mod.MemberGuardians.Ctl.MemberGuardiansUpdate)
+			guardians.DELETE("/:id", mod.MemberGuardians.Ctl.MemberGuardiansDelete)
+		}
+
+		studentGuardians := members.Group("/student-guardians")
+		{
+			studentGuardians.GET("", mod.StudentGuardians.Ctl.StudentGuardiansList)
+			studentGuardians.GET("/:id", mod.StudentGuardians.Ctl.StudentGuardiansInfo)
+			studentGuardians.POST("", mod.StudentGuardians.Ctl.CreateStudentGuardianController)
+			studentGuardians.PATCH("/:id", mod.StudentGuardians.Ctl.StudentGuardiansUpdate)
+			studentGuardians.DELETE("/:id", mod.StudentGuardians.Ctl.StudentGuardiansDelete)
+		}
+
+		studentProfiles := members.Group("/student-profiles")
+		{
+			studentProfiles.GET("", mod.StudentProfiles.Ctl.StudentProfilesList)
+			studentProfiles.GET("/:id", mod.StudentProfiles.Ctl.StudentProfilesInfo)
+			studentProfiles.POST("", mod.StudentProfiles.Ctl.CreateStudentProfileController)
+			studentProfiles.PATCH("/:id", mod.StudentProfiles.Ctl.StudentProfilesUpdate)
+			studentProfiles.DELETE("/:id", mod.StudentProfiles.Ctl.StudentProfilesDelete)
+		}
+
+		studentHealthProfiles := members.Group("/student-health-profiles")
+		{
+			studentHealthProfiles.GET("", mod.StudentHealthProfiles.Ctl.StudentHealthProfilesList)
+			studentHealthProfiles.GET("/:id", mod.StudentHealthProfiles.Ctl.StudentHealthProfilesInfo)
+			studentHealthProfiles.POST("", mod.StudentHealthProfiles.Ctl.CreateStudentHealthProfileController)
+			studentHealthProfiles.PATCH("/:id", mod.StudentHealthProfiles.Ctl.StudentHealthProfilesUpdate)
+			studentHealthProfiles.DELETE("/:id", mod.StudentHealthProfiles.Ctl.StudentHealthProfilesDelete)
+		}
+
 		managements := members.Group("/managements")
 		{
 			managements.GET("", mod.MemberManagements.Ctl.MemberManagementsList)
@@ -129,6 +174,42 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 			requests.PATCH("/:id", mod.TeacherRequests.Ctl.TeacherRequestsUpdate)
 			requests.DELETE("/:id", mod.TeacherRequests.Ctl.TeacherRequestsDelete)
 		}
+
+		licenses := members.Group("/teacher-licenses")
+		{
+			licenses.GET("", mod.TeacherLicenses.Ctl.TeacherLicensesList)
+			licenses.GET("/:id", mod.TeacherLicenses.Ctl.TeacherLicensesInfo)
+			licenses.POST("", mod.TeacherLicenses.Ctl.CreateTeacherLicenseController)
+			licenses.PATCH("/:id", mod.TeacherLicenses.Ctl.TeacherLicensesUpdate)
+			licenses.DELETE("/:id", mod.TeacherLicenses.Ctl.TeacherLicensesDelete)
+		}
+
+		subjects := members.Group("/teacher-subjects")
+		{
+			subjects.GET("", mod.TeacherSubjects.Ctl.TeacherSubjectsList)
+			subjects.GET("/:id", mod.TeacherSubjects.Ctl.TeacherSubjectsInfo)
+			subjects.POST("", mod.TeacherSubjects.Ctl.CreateTeacherSubjectController)
+			subjects.PATCH("/:id", mod.TeacherSubjects.Ctl.TeacherSubjectsUpdate)
+			subjects.DELETE("/:id", mod.TeacherSubjects.Ctl.TeacherSubjectsDelete)
+		}
+
+		healthProfiles := members.Group("/teacher-health-profiles")
+		{
+			healthProfiles.GET("", mod.TeacherHealthProfiles.Ctl.TeacherHealthProfilesList)
+			healthProfiles.GET("/:id", mod.TeacherHealthProfiles.Ctl.TeacherHealthProfilesInfo)
+			healthProfiles.POST("", mod.TeacherHealthProfiles.Ctl.CreateTeacherHealthProfileController)
+			healthProfiles.PATCH("/:id", mod.TeacherHealthProfiles.Ctl.TeacherHealthProfilesUpdate)
+			healthProfiles.DELETE("/:id", mod.TeacherHealthProfiles.Ctl.TeacherHealthProfilesDelete)
+		}
+
+		emergencyContacts := members.Group("/teacher-emergency-contacts")
+		{
+			emergencyContacts.GET("", mod.TeacherEmergencyContacts.Ctl.TeacherEmergencyContactsList)
+			emergencyContacts.GET("/:id", mod.TeacherEmergencyContacts.Ctl.TeacherEmergencyContactsInfo)
+			emergencyContacts.POST("", mod.TeacherEmergencyContacts.Ctl.CreateTeacherEmergencyContactController)
+			emergencyContacts.PATCH("/:id", mod.TeacherEmergencyContacts.Ctl.TeacherEmergencyContactsUpdate)
+			emergencyContacts.DELETE("/:id", mod.TeacherEmergencyContacts.Ctl.TeacherEmergencyContactsDelete)
+		}
 	}
 }
 
@@ -163,5 +244,23 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 			subjects.PATCH("/:id", mod.Subjects.Ctl.SubjectsUpdate)
 			subjects.DELETE("/:id", mod.Subjects.Ctl.SubjectsDelete)
 		}
+	}
+}
+
+func apiEnrollments(r *gin.RouterGroup, mod *modules.Modules) {
+	// Enrollment routes (authentication required) e.g. for student enrollments, etc.
+	enrollments := r.Group("/enrollments")
+	_ = enrollments
+	{
+		// Add enrollment routes here
+	}
+}
+
+func apiAttendance(r *gin.RouterGroup, mod *modules.Modules) {
+	// Attendance routes (authentication required) e.g. for student attendance, etc.
+	attendance := r.Group("/attendance")
+	_ = attendance
+	{
+		// Add attendance routes here
 	}
 }

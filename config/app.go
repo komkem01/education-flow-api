@@ -7,18 +7,27 @@ import (
 	"eduflow/app/modules/example"
 	exampletwo "eduflow/app/modules/example-two"
 	"eduflow/app/modules/genders"
+	"eduflow/app/modules/memberguardians"
 	"eduflow/app/modules/membermanagements"
 	"eduflow/app/modules/members"
+	"eduflow/app/modules/memberstudents"
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/prefixes"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
+	"eduflow/app/modules/studentguardians"
+	"eduflow/app/modules/studenthealthprofiles"
+	"eduflow/app/modules/studentprofiles"
 	"eduflow/app/modules/subjectgroups"
 	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
+	"eduflow/app/modules/teacheremergencycontacts"
 	"eduflow/app/modules/teacherexperiences"
+	"eduflow/app/modules/teacherhealthprofiles"
+	"eduflow/app/modules/teacherlicenses"
 	"eduflow/app/modules/teacherrequests"
+	"eduflow/app/modules/teachersubjects"
 	"eduflow/internal/kafka"
 	"eduflow/internal/log"
 	"eduflow/internal/otel/collector"
@@ -49,21 +58,30 @@ type Config struct {
 
 	Example example.Config
 
-	ExampleTwo         exampletwo.Config
-	Genders            genders.Config
-	Prefixes           prefixes.Config
-	Schools            schools.Config
-	Departments        departments.Config
-	AcademicYears      academicyears.Config
-	Classrooms         classrooms.Config
-	SubjectGroups      subjectgroups.Config
-	Subjects           subjects.Config
-	Members            members.Config
-	MemberManagements  membermanagements.Config
-	MemberTeachers     memberteachers.Config
-	TeacherEducations  teachereducations.Config
-	TeacherExperiences teacherexperiences.Config
-	TeacherRequests    teacherrequests.Config
+	ExampleTwo               exampletwo.Config
+	Genders                  genders.Config
+	Prefixes                 prefixes.Config
+	Schools                  schools.Config
+	Departments              departments.Config
+	AcademicYears            academicyears.Config
+	Classrooms               classrooms.Config
+	SubjectGroups            subjectgroups.Config
+	Subjects                 subjects.Config
+	Members                  members.Config
+	MemberStudents           memberstudents.Config
+	MemberGuardians          memberguardians.Config
+	StudentGuardians         studentguardians.Config
+	StudentProfiles          studentprofiles.Config
+	StudentHealthProfiles    studenthealthprofiles.Config
+	MemberManagements        membermanagements.Config
+	MemberTeachers           memberteachers.Config
+	TeacherEducations        teachereducations.Config
+	TeacherEmergencyContacts teacheremergencycontacts.Config
+	TeacherLicenses          teacherlicenses.Config
+	TeacherExperiences       teacherexperiences.Config
+	TeacherHealthProfiles    teacherhealthprofiles.Config
+	TeacherRequests          teacherrequests.Config
+	TeacherSubjects          teachersubjects.Config
 }
 
 var App = Config{

@@ -43,4 +43,6 @@ func Router(app *gin.Engine, mod *modules.Modules) {
 	apiPublic(app.Group("/api/v1"), mod)
 	apiMember(app.Group("/api/v1"), mod)
 	apiManagement(app.Group("/api/v1"), mod)
+	apiEnrollments(app.Group("/api/v1"), mod)
+	apiAttendance(app.Group("/api/v1"), mod)
 }
