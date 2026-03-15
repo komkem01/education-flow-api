@@ -1,6 +1,8 @@
 package approvals
 
 import (
+	"eduflow/app/modules/auth"
+	"eduflow/app/modules/entities/ent"
 	"eduflow/app/utils"
 	"eduflow/app/utils/base"
 
@@ -13,8 +15,6 @@ type ActionByIDRequest struct {
 }
 
 type ActionRequest struct {
-	ActorID        string         `json:"actor_id" binding:"required"`
-	ActorRole      string         `json:"actor_role" binding:"required"`
 	IdempotencyKey *string        `json:"idempotency_key"`
 	Comment        *string        `json:"comment"`
 	Metadata       map[string]any `json:"metadata"`
@@ -28,8 +28,12 @@ func (c *Controller) Submit(ctx *gin.Context) {
 	if !ok {
 		return
 	}
+	actorID, actorRole, ok := c.resolveActorFromContext(ctx)
+	if !ok {
+		return
+	}
 
-	item, err := c.svc.Submit(ctx.Request.Context(), id, req.ActorID, req.ActorRole, req.Comment)
+	item, err := c.svc.Submit(ctx.Request.Context(), id, actorID, actorRole, req.Comment)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "approval-request-submit-failed")
 		return
@@ -46,8 +50,12 @@ func (c *Controller) Approve(ctx *gin.Context) {
 	if !ok {
 		return
 	}
+	actorID, actorRole, ok := c.resolveActorFromContext(ctx)
+	if !ok {
+		return
+	}
 
-	item, err := c.svc.Approve(ctx.Request.Context(), id, req.ActorID, req.ActorRole, req.IdempotencyKey, req.Comment, req.Metadata)
+	item, err := c.svc.Approve(ctx.Request.Context(), id, actorID, actorRole, req.IdempotencyKey, req.Comment, req.Metadata)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "approval-request-approve-failed")
 		return
@@ -64,8 +72,12 @@ func (c *Controller) Reject(ctx *gin.Context) {
 	if !ok {
 		return
 	}
+	actorID, actorRole, ok := c.resolveActorFromContext(ctx)
+	if !ok {
+		return
+	}
 
-	item, err := c.svc.Reject(ctx.Request.Context(), id, req.ActorID, req.ActorRole, req.IdempotencyKey, req.Comment, req.Metadata)
+	item, err := c.svc.Reject(ctx.Request.Context(), id, actorID, actorRole, req.IdempotencyKey, req.Comment, req.Metadata)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "approval-request-reject-failed")
 		return
@@ -82,8 +94,12 @@ func (c *Controller) Cancel(ctx *gin.Context) {
 	if !ok {
 		return
 	}
+	actorID, actorRole, ok := c.resolveActorFromContext(ctx)
+	if !ok {
+		return
+	}
 
-	item, err := c.svc.Cancel(ctx.Request.Context(), id, req.ActorID, req.ActorRole, req.IdempotencyKey, req.Comment, req.Metadata)
+	item, err := c.svc.Cancel(ctx.Request.Context(), id, actorID, actorRole, req.IdempotencyKey, req.Comment, req.Metadata)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "approval-request-cancel-failed")
 		return
@@ -112,6 +128,28 @@ func (c *Controller) bindActionRequest(ctx *gin.Context) (uuid.UUID, *ActionRequ
 	}
 
 	return id, &req, true
+}
+
+func (c *Controller) resolveActorFromContext(ctx *gin.Context) (string, string, bool) {
+	currentUser, ok := auth.CurrentUserFromGin(ctx)
+	if !ok || currentUser == nil || currentUser.Member == nil {
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return "", "", false
+	}
+
+	actorID := currentUser.Member.ID.String()
+	actorRole := ""
+	switch currentUser.Member.Role {
+	case ent.MemberRoleTeacher:
+		actorRole = string(ent.ApprovalActorRoleTeacher)
+	case ent.MemberRoleAdmin, ent.MemberRoleSuperadmin:
+		actorRole = string(ent.ApprovalActorRoleAdmin)
+	default:
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return "", "", false
+	}
+
+	return actorID, actorRole, true
 }
 
 func (c *Controller) ApprovalRequestsSubmit(ctx *gin.Context) {

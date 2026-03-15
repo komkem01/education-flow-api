@@ -251,6 +251,12 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 			subjects.PATCH("/:id", mod.Subjects.Ctl.SubjectsUpdate)
 			subjects.DELETE("/:id", mod.Subjects.Ctl.SubjectsDelete)
 		}
+
+		auditLogs := management.Group("/audit-logs")
+		{
+			auditLogs.GET("", mod.AuditLogs.Ctl.AuditLogsList)
+			auditLogs.GET("/:id", mod.AuditLogs.Ctl.AuditLogsInfo)
+		}
 	}
 }
 

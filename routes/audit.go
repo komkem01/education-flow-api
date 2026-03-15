@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"eduflow/app/modules/auth"
@@ -17,6 +19,12 @@ import (
 )
 
 const maxAuditPayloadLength = 16384
+const maxAuditReadBytes = 16384
+const auditRetentionDays = 90
+const auditPurgeInterval = 6 * time.Hour
+
+var auditPurgeMu sync.Mutex
+var auditLastPurgeAt time.Time
 
 var auditSensitiveKeys = map[string]struct{}{
 	"password":      {},
@@ -30,21 +38,54 @@ var auditSensitiveKeys = map[string]struct{}{
 
 type auditBodyWriter struct {
 	gin.ResponseWriter
-	body *bytes.Buffer
+	body      *bytes.Buffer
+	max       int
+	truncated bool
 }
 
 func (w *auditBodyWriter) Write(b []byte) (int, error) {
-	if w.body != nil {
-		w.body.Write(b)
+	if w.body != nil && w.max > 0 {
+		remain := w.max - w.body.Len()
+		if remain > 0 {
+			if len(b) > remain {
+				w.body.Write(b[:remain])
+				w.truncated = true
+			} else {
+				w.body.Write(b)
+			}
+		} else {
+			w.truncated = true
+		}
 	}
 	return w.ResponseWriter.Write(b)
 }
 
 func (w *auditBodyWriter) WriteString(s string) (int, error) {
-	if w.body != nil {
-		w.body.WriteString(s)
+	if w.body != nil && w.max > 0 {
+		remain := w.max - w.body.Len()
+		if remain > 0 {
+			if len(s) > remain {
+				w.body.WriteString(s[:remain])
+				w.truncated = true
+			} else {
+				w.body.WriteString(s)
+			}
+		} else {
+			w.truncated = true
+		}
 	}
 	return w.ResponseWriter.WriteString(s)
+}
+
+func (w *auditBodyWriter) BodyString() string {
+	if w.body == nil {
+		return ""
+	}
+	raw := w.body.String()
+	if w.truncated {
+		return raw + "...(truncated)"
+	}
+	return raw
 }
 
 func AuditLogMiddleware(auditEnt entitiesinf.AuditLogEntity) gin.HandlerFunc {
@@ -56,7 +97,7 @@ func AuditLogMiddleware(auditEnt entitiesinf.AuditLogEntity) gin.HandlerFunc {
 		start := time.Now()
 		requestBody := captureRequestBody(ctx)
 
-		writer := &auditBodyWriter{ResponseWriter: ctx.Writer, body: bytes.NewBuffer(nil)}
+		writer := &auditBodyWriter{ResponseWriter: ctx.Writer, body: bytes.NewBuffer(nil), max: maxAuditReadBytes}
 		ctx.Writer = writer
 		ctx.Next()
 
@@ -68,8 +109,8 @@ func AuditLogMiddleware(auditEnt entitiesinf.AuditLogEntity) gin.HandlerFunc {
 			IP:           strPtr(ctx.ClientIP()),
 			UserAgent:    strPtr(ctx.Request.UserAgent()),
 			QueryString:  strPtr(ctx.Request.URL.RawQuery),
-			RequestBody:  strPtr(sanitizePayload(requestBody, ctx.ContentType())),
-			ResponseBody: strPtr(sanitizePayload(writer.body.String(), ctx.Writer.Header().Get("Content-Type"))),
+			RequestBody:  strPtr(sanitizePayload(requestBody, ctx.ContentType(), ctx.Request.URL.Path)),
+			ResponseBody: strPtr(sanitizePayload(writer.BodyString(), ctx.Writer.Header().Get("Content-Type"), ctx.Request.URL.Path)),
 			ErrorMessage: strPtr(ctx.Errors.String()),
 		}
 
@@ -91,6 +132,8 @@ func AuditLogMiddleware(auditEnt entitiesinf.AuditLogEntity) gin.HandlerFunc {
 		writeCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		_, _ = auditEnt.CreateAuditLog(writeCtx, auditLog)
+
+		go maybePurgeAuditLogs(auditEnt)
 	}
 }
 
@@ -98,21 +141,32 @@ func captureRequestBody(ctx *gin.Context) string {
 	if ctx.Request == nil || ctx.Request.Body == nil {
 		return ""
 	}
-	bodyBytes, err := io.ReadAll(ctx.Request.Body)
+	if !shouldCaptureRequestBody(ctx.Request.Method, ctx.ContentType(), ctx.Request.ContentLength) {
+		return ""
+	}
+	bodyBytes, err := io.ReadAll(io.LimitReader(ctx.Request.Body, maxAuditReadBytes+1))
 	if err != nil {
 		return ""
 	}
 	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	if len(bodyBytes) > maxAuditReadBytes {
+		return string(bodyBytes[:maxAuditReadBytes]) + "...(truncated)"
+	}
 	return string(bodyBytes)
 }
 
-func sanitizePayload(raw string, contentType string) string {
+func sanitizePayload(raw string, contentType string, path string) string {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
 		return ""
 	}
 
-	if strings.Contains(strings.ToLower(contentType), "application/json") {
+	lowerContentType := strings.ToLower(contentType)
+	if shouldRedactPath(path) {
+		return "[REDACTED]"
+	}
+
+	if strings.Contains(lowerContentType, "application/json") {
 		var v any
 		if err := json.Unmarshal([]byte(raw), &v); err == nil {
 			maskSensitive(v)
@@ -121,11 +175,59 @@ func sanitizePayload(raw string, contentType string) string {
 			}
 		}
 	}
+	if strings.Contains(lowerContentType, "application/x-www-form-urlencoded") {
+		if vals, err := url.ParseQuery(raw); err == nil {
+			for k := range vals {
+				if _, ok := auditSensitiveKeys[strings.ToLower(k)]; ok {
+					vals.Set(k, "***")
+				}
+			}
+			raw = vals.Encode()
+		}
+	}
+	if strings.Contains(lowerContentType, "multipart/form-data") {
+		return "[MULTIPART_OMITTED]"
+	}
 
 	if len(raw) > maxAuditPayloadLength {
 		return raw[:maxAuditPayloadLength] + "...(truncated)"
 	}
 	return raw
+}
+
+func shouldCaptureRequestBody(method string, contentType string, contentLength int64) bool {
+	switch strings.ToUpper(method) {
+	case "GET", "HEAD", "OPTIONS":
+		return false
+	}
+	lowerContentType := strings.ToLower(contentType)
+	if strings.Contains(lowerContentType, "multipart/form-data") {
+		return false
+	}
+	if contentLength < 0 || contentLength > maxAuditReadBytes {
+		return false
+	}
+	return true
+}
+
+func shouldRedactPath(path string) bool {
+	p := strings.ToLower(path)
+	return strings.Contains(p, "/auth/login") || strings.Contains(p, "/auth/refresh")
+}
+
+func maybePurgeAuditLogs(auditEnt entitiesinf.AuditLogEntity) {
+	now := time.Now()
+	auditPurgeMu.Lock()
+	if !auditLastPurgeAt.IsZero() && now.Sub(auditLastPurgeAt) < auditPurgeInterval {
+		auditPurgeMu.Unlock()
+		return
+	}
+	auditLastPurgeAt = now
+	auditPurgeMu.Unlock()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	_ = auditEnt.PurgeAuditLogsBefore(ctx, now.AddDate(0, 0, -auditRetentionDays))
 }
 
 func maskSensitive(v any) {

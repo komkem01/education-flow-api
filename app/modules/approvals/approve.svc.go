@@ -38,6 +38,9 @@ func (s *Service) Approve(ctx context.Context, id uuid.UUID, actorID string, act
 	if item.CurrentStatus != ent.ApprovalRequestStatusPending {
 		return nil, fmt.Errorf("%w", ErrApprovalRequestConditionFail)
 	}
+	if err := s.applyApprovalEffects(ctx, item); err != nil {
+		return nil, err
+	}
 
 	now := time.Now()
 	updated, err := s.db.UpdateApprovalRequestByID(ctx, id, &ent.ApprovalRequestUpdate{

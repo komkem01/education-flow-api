@@ -12,3 +12,5 @@ invalid-approval-reason: Approval reason is required
 invalid-date-range: Invalid date range
 invalid-request-reason: Request reason is required
 invalid-school-scope: Cross-school operation is not allowed
+audit-log-not-found: Audit log not found
+condition-fail: Request condition failed
