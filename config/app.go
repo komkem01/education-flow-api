@@ -2,6 +2,9 @@ package config
 
 import (
 	academicyears "eduflow/app/modules/academicyears"
+	"eduflow/app/modules/attendancerecordlogs"
+	"eduflow/app/modules/attendancerecords"
+	"eduflow/app/modules/attendancesessions"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"eduflow/app/modules/enrollmentstatushistories"
@@ -70,6 +73,9 @@ type Config struct {
 	Classrooms                classrooms.Config
 	SubjectGroups             subjectgroups.Config
 	Subjects                  subjects.Config
+	AttendanceSessions        attendancesessions.Config
+	AttendanceRecords         attendancerecords.Config
+	AttendanceRecordLogs      attendancerecordlogs.Config
 	Members                   members.Config
 	MemberStudents            memberstudents.Config
 	MemberGuardians           memberguardians.Config

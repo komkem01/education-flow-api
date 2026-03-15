@@ -283,8 +283,34 @@ func apiEnrollments(r *gin.RouterGroup, mod *modules.Modules) {
 func apiAttendance(r *gin.RouterGroup, mod *modules.Modules) {
 	// Attendance routes (authentication required) e.g. for student attendance, etc.
 	attendance := r.Group("/attendance")
-	_ = attendance
 	{
-		// Add attendance routes here
+		sessions := attendance.Group("/sessions")
+		{
+			sessions.GET("", mod.AttendanceSessions.Ctl.AttendanceSessionsList)
+			sessions.GET("/:id", mod.AttendanceSessions.Ctl.AttendanceSessionsInfo)
+			sessions.GET("/:id/roster", mod.AttendanceSessions.Ctl.AttendanceSessionsRoster)
+			sessions.POST("", mod.AttendanceSessions.Ctl.CreateAttendanceSessionController)
+			sessions.PATCH("/:id", mod.AttendanceSessions.Ctl.AttendanceSessionsUpdate)
+			sessions.DELETE("/:id", mod.AttendanceSessions.Ctl.AttendanceSessionsDelete)
+		}
+
+		records := attendance.Group("/records")
+		{
+			records.GET("", mod.AttendanceRecords.Ctl.AttendanceRecordsList)
+			records.GET("/:id", mod.AttendanceRecords.Ctl.AttendanceRecordsInfo)
+			records.POST("", mod.AttendanceRecords.Ctl.CreateAttendanceRecordController)
+			records.PATCH("/:id", mod.AttendanceRecords.Ctl.AttendanceRecordsUpdate)
+			records.PATCH("/bulk-mark", mod.AttendanceRecords.Ctl.AttendanceRecordsBulkMark)
+			records.DELETE("/:id", mod.AttendanceRecords.Ctl.AttendanceRecordsDelete)
+		}
+
+		recordLogs := attendance.Group("/record-logs")
+		{
+			recordLogs.GET("", mod.AttendanceRecordLogs.Ctl.AttendanceRecordLogsList)
+			recordLogs.GET("/:id", mod.AttendanceRecordLogs.Ctl.AttendanceRecordLogsInfo)
+			recordLogs.POST("", mod.AttendanceRecordLogs.Ctl.CreateAttendanceRecordLogController)
+			recordLogs.PATCH("/:id", mod.AttendanceRecordLogs.Ctl.AttendanceRecordLogsUpdate)
+			recordLogs.DELETE("/:id", mod.AttendanceRecordLogs.Ctl.AttendanceRecordLogsDelete)
+		}
 	}
 }

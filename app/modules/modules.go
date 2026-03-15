@@ -2,6 +2,9 @@ package modules
 
 import (
 	academicyears "eduflow/app/modules/academicyears"
+	"eduflow/app/modules/attendancerecordlogs"
+	"eduflow/app/modules/attendancerecords"
+	"eduflow/app/modules/attendancesessions"
 	"eduflow/app/modules/classrooms"
 	"eduflow/app/modules/departments"
 	"log/slog"
@@ -64,6 +67,9 @@ type Modules struct {
 	Classrooms                *classrooms.Module
 	SubjectGroups             *subjectgroups.Module
 	Subjects                  *subjects.Module
+	AttendanceSessions        *attendancesessions.Module
+	AttendanceRecords         *attendancerecords.Module
+	AttendanceRecordLogs      *attendancerecordlogs.Module
 	Members                   *members.Module
 	MemberStudents            *memberstudents.Module
 	MemberGuardians           *memberguardians.Module
@@ -107,6 +113,9 @@ func modulesInit() {
 	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
+	attendanceSessionsMod := attendancesessions.New(config.Conf[attendancesessions.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
+	attendanceRecordsMod := attendancerecords.New(config.Conf[attendancerecords.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
+	attendanceRecordLogsMod := attendancerecordlogs.New(config.Conf[attendancerecordlogs.Config](confMod.Svc), entitiesMod.Svc)
 	membersMod := members.New(config.Conf[members.Config](confMod.Svc), entitiesMod.Svc)
 	memberStudentsMod := memberstudents.New(config.Conf[memberstudents.Config](confMod.Svc), entitiesMod.Svc)
 	memberGuardiansMod := memberguardians.New(config.Conf[memberguardians.Config](confMod.Svc), entitiesMod.Svc)
@@ -144,6 +153,9 @@ func modulesInit() {
 		Classrooms:                classroomsMod,
 		SubjectGroups:             subjectGroupsMod,
 		Subjects:                  subjectsMod,
+		AttendanceSessions:        attendanceSessionsMod,
+		AttendanceRecords:         attendanceRecordsMod,
+		AttendanceRecordLogs:      attendanceRecordLogsMod,
 		Members:                   membersMod,
 		MemberStudents:            memberStudentsMod,
 		MemberGuardians:           memberGuardiansMod,
