@@ -38,12 +38,15 @@ func Router(app *gin.Engine, mod *modules.Modules) {
 		AllowFiles:             false,
 	}))
 
-	api(app.Group("/api/v1"), mod)
-	apiSystem(app.Group("/api/v1"), mod)
-	apiPublic(app.Group("/api/v1"), mod)
-	apiMember(app.Group("/api/v1"), mod)
-	apiManagement(app.Group("/api/v1"), mod)
-	apiEnrollments(app.Group("/api/v1"), mod)
-	apiAttendance(app.Group("/api/v1"), mod)
-	apiApproval(app.Group("/api/v1"), mod)
+	v1 := app.Group("/api/v1")
+	v1.Use(AuditLogMiddleware(mod.ENT.Svc))
+
+	api(v1, mod)
+	apiSystem(v1, mod)
+	apiPublic(v1, mod)
+	apiMember(v1, mod)
+	apiManagement(v1, mod)
+	apiEnrollments(v1, mod)
+	apiAttendance(v1, mod)
+	apiApproval(v1, mod)
 }
