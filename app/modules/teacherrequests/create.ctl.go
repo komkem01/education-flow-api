@@ -9,13 +9,15 @@ import (
 )
 
 type CreateRequest struct {
-	TeacherID     string         `json:"teacher_id" binding:"required"`
-	RequestType   string         `json:"request_type" binding:"required"`
-	RequestData   map[string]any `json:"request_data" binding:"required"`
-	RequestReason *string        `json:"request_reason"`
-	Status        *string        `json:"status"`
-	ApprovedBy    *string        `json:"approved_by"`
-	ApprovedAt    *string        `json:"approved_at"`
+	TeacherID       string         `json:"teacher_id" binding:"required"`
+	RequestedBy     string         `json:"requested_by" binding:"required"`
+	RequestedByRole string         `json:"requested_by_role" binding:"required"`
+	RequestType     string         `json:"request_type" binding:"required"`
+	RequestData     map[string]any `json:"request_data" binding:"required"`
+	RequestReason   *string        `json:"request_reason"`
+	Status          *string        `json:"status"`
+	ApprovedBy      *string        `json:"approved_by"`
+	ApprovedAt      *string        `json:"approved_at"`
 }
 
 func (c *Controller) Create(ctx *gin.Context) {
@@ -44,7 +46,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 		approvedBy = &parsed
 	}
 
-	item, err := c.svc.Create(ctx.Request.Context(), teacherID, req.RequestType, req.RequestData, req.RequestReason, req.Status, approvedBy, req.ApprovedAt)
+	item, err := c.svc.Create(ctx.Request.Context(), teacherID, req.RequestedBy, req.RequestedByRole, req.RequestType, req.RequestData, req.RequestReason, req.Status, approvedBy, req.ApprovedAt)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "teacher-request-create-failed")
 		return

@@ -45,4 +45,5 @@ func Router(app *gin.Engine, mod *modules.Modules) {
 	apiManagement(app.Group("/api/v1"), mod)
 	apiEnrollments(app.Group("/api/v1"), mod)
 	apiAttendance(app.Group("/api/v1"), mod)
+	apiApproval(app.Group("/api/v1"), mod)
 }

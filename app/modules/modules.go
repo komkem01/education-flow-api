@@ -2,6 +2,7 @@ package modules
 
 import (
 	academicyears "eduflow/app/modules/academicyears"
+	"eduflow/app/modules/approvals"
 	"eduflow/app/modules/attendancerecordlogs"
 	"eduflow/app/modules/attendancerecords"
 	"eduflow/app/modules/attendancesessions"
@@ -67,6 +68,7 @@ type Modules struct {
 	Classrooms                *classrooms.Module
 	SubjectGroups             *subjectgroups.Module
 	Subjects                  *subjects.Module
+	Approvals                 *approvals.Module
 	AttendanceSessions        *attendancesessions.Module
 	AttendanceRecords         *attendancerecords.Module
 	AttendanceRecordLogs      *attendancerecordlogs.Module
@@ -113,6 +115,7 @@ func modulesInit() {
 	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
+	approvalsMod := approvals.New(config.Conf[approvals.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	attendanceSessionsMod := attendancesessions.New(config.Conf[attendancesessions.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordsMod := attendancerecords.New(config.Conf[attendancerecords.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordLogsMod := attendancerecordlogs.New(config.Conf[attendancerecordlogs.Config](confMod.Svc), entitiesMod.Svc)
@@ -132,7 +135,7 @@ func modulesInit() {
 	teacherLicensesMod := teacherlicenses.New(config.Conf[teacherlicenses.Config](confMod.Svc), entitiesMod.Svc)
 	teacherExperiencesMod := teacherexperiences.New(config.Conf[teacherexperiences.Config](confMod.Svc), entitiesMod.Svc)
 	teacherHealthProfilesMod := teacherhealthprofiles.New(config.Conf[teacherhealthprofiles.Config](confMod.Svc), entitiesMod.Svc)
-	teacherRequestsMod := teacherrequests.New(config.Conf[teacherrequests.Config](confMod.Svc), entitiesMod.Svc)
+	teacherRequestsMod := teacherrequests.New(config.Conf[teacherrequests.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	teacherSubjectsMod := teachersubjects.New(config.Conf[teachersubjects.Config](confMod.Svc), entitiesMod.Svc)
 	// kafka := kafka.New(&conf.Kafka)
 	mod = &Modules{
@@ -153,6 +156,7 @@ func modulesInit() {
 		Classrooms:                classroomsMod,
 		SubjectGroups:             subjectGroupsMod,
 		Subjects:                  subjectsMod,
+		Approvals:                 approvalsMod,
 		AttendanceSessions:        attendanceSessionsMod,
 		AttendanceRecords:         attendanceRecordsMod,
 		AttendanceRecordLogs:      attendanceRecordLogsMod,

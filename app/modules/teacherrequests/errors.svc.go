@@ -56,3 +56,13 @@ func parseTeacherRequestStatus(v string) (ent.TeacherRequestStatus, bool) {
 		return "", false
 	}
 }
+
+func parseApprovalActorRole(v string) (ent.ApprovalActorRole, bool) {
+	r := ent.ApprovalActorRole(v)
+	switch r {
+	case ent.ApprovalActorRoleTeacher, ent.ApprovalActorRoleAdmin:
+		return r, true
+	default:
+		return "", false
+	}
+}

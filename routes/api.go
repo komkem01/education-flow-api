@@ -314,3 +314,20 @@ func apiAttendance(r *gin.RouterGroup, mod *modules.Modules) {
 		}
 	}
 }
+
+func apiApproval(r *gin.RouterGroup, mod *modules.Modules) {
+	approval := r.Group("/approval")
+	{
+		requests := approval.Group("/requests")
+		{
+			requests.GET("", mod.Approvals.Ctl.ApprovalRequestsList)
+			requests.GET("/:id", mod.Approvals.Ctl.ApprovalRequestsInfo)
+			requests.GET("/:id/actions", mod.Approvals.Ctl.ApprovalRequestsActionsList)
+			requests.POST("", mod.Approvals.Ctl.CreateApprovalRequestController)
+			requests.POST("/:id/submit", mod.Approvals.Ctl.ApprovalRequestsSubmit)
+			requests.POST("/:id/approve", mod.Approvals.Ctl.ApprovalRequestsApprove)
+			requests.POST("/:id/reject", mod.Approvals.Ctl.ApprovalRequestsReject)
+			requests.POST("/:id/cancel", mod.Approvals.Ctl.ApprovalRequestsCancel)
+		}
+	}
+}

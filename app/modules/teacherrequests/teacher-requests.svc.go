@@ -11,15 +11,19 @@ type Config struct{}
 
 type Options struct {
 	*config.Config[Config]
-	tracer trace.Tracer
-	db     entitiesinf.TeacherRequestEntity
+	tracer   trace.Tracer
+	db       entitiesinf.TeacherRequestEntity
+	approval entitiesinf.ApprovalRequestEntity
+	action   entitiesinf.ApprovalActionEntity
 }
 
 type Service struct {
-	tracer trace.Tracer
-	db     entitiesinf.TeacherRequestEntity
+	tracer   trace.Tracer
+	db       entitiesinf.TeacherRequestEntity
+	approval entitiesinf.ApprovalRequestEntity
+	action   entitiesinf.ApprovalActionEntity
 }
 
 func newService(opt *Options) *Service {
-	return &Service{tracer: opt.tracer, db: opt.db}
+	return &Service{tracer: opt.tracer, db: opt.db, approval: opt.approval, action: opt.action}
 }
