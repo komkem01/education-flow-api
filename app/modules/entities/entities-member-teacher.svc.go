@@ -1,0 +1,168 @@
+package entities
+
+import (
+	"context"
+	"database/sql"
+
+	"eduflow/app/modules/entities/ent"
+	entitiesinf "eduflow/app/modules/entities/inf"
+	"eduflow/app/utils/base"
+
+	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+)
+
+var _ entitiesinf.MemberTeacherEntity = (*Service)(nil)
+
+func (s *Service) CreateMemberTeacher(ctx context.Context, teacher *ent.MemberTeacher) (*ent.MemberTeacher, error) {
+	if _, err := s.db.NewInsert().Model(teacher).Returning("*").Exec(ctx); err != nil {
+		return nil, err
+	}
+
+	return teacher, nil
+}
+
+func (s *Service) GetMemberTeacherByID(ctx context.Context, id uuid.UUID) (*ent.MemberTeacher, error) {
+	teacher := new(ent.MemberTeacher)
+	if err := s.db.NewSelect().Model(teacher).Where("id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return teacher, nil
+}
+
+func (s *Service) ListMemberTeachers(ctx context.Context, req *base.RequestPaginate, isActive *bool, memberID *uuid.UUID, departmentID *uuid.UUID) ([]*ent.MemberTeacher, *base.ResponsePaginate, error) {
+	if req == nil {
+		req = &base.RequestPaginate{}
+	}
+
+	teachers := make([]*ent.MemberTeacher, 0)
+	query := s.db.NewSelect().Model(&teachers)
+
+	if isActive != nil {
+		query.Where("is_active = ?", *isActive)
+	}
+	if memberID != nil {
+		query.Where("member_id = ?", *memberID)
+	}
+	if departmentID != nil {
+		query.Where("department = ?", *departmentID)
+	}
+
+	if err := req.SetSearchBy(query, []string{"code", "citizen_id", "first_name_th", "last_name_th", "first_name_en", "last_name_en", "phone", "position", "academic_standing"}); err != nil {
+		return nil, nil, err
+	}
+
+	if req.SortBy == "" {
+		query.Order("created_at DESC")
+	}
+
+	if err := req.SetSortOrder(query, []string{"created_at", "code", "start_date", "first_name_th", "last_name_th", "is_active"}); err != nil {
+		return nil, nil, err
+	}
+
+	req.SetOffsetLimit(query)
+
+	total, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return teachers, &base.ResponsePaginate{Page: req.GetPage(), Size: req.GetSize(), Total: int64(total)}, nil
+}
+
+func (s *Service) UpdateMemberTeacherByID(ctx context.Context, id uuid.UUID, req *ent.MemberTeacherUpdate) (*ent.MemberTeacher, error) {
+	query := s.db.NewUpdate().
+		Model(&ent.MemberTeacher{}).
+		Where("id = ?", id).
+		Set("updated_at = now()")
+
+	if req.MemberID != nil {
+		query.Set("member_id = ?", *req.MemberID)
+	}
+	if req.GenderID != nil {
+		query.Set("gender_id = ?", *req.GenderID)
+	}
+	if req.PrefixID != nil {
+		query.Set("prefix_id = ?", *req.PrefixID)
+	}
+	if req.Code != nil {
+		query.Set("code = ?", *req.Code)
+	}
+	if req.CitizenID != nil {
+		query.Set("citizen_id = ?", *req.CitizenID)
+	}
+	if req.FirstNameTH != nil {
+		query.Set("first_name_th = ?", *req.FirstNameTH)
+	}
+	if req.LastNameTH != nil {
+		query.Set("last_name_th = ?", *req.LastNameTH)
+	}
+	if req.FirstNameEN != nil {
+		query.Set("first_name_en = ?", *req.FirstNameEN)
+	}
+	if req.LastNameEN != nil {
+		query.Set("last_name_en = ?", *req.LastNameEN)
+	}
+	if req.Phone != nil {
+		query.Set("phone = ?", *req.Phone)
+	}
+	if req.Position != nil {
+		query.Set("position = ?", *req.Position)
+	}
+	if req.AcademicStanding != nil {
+		query.Set("academic_standing = ?", *req.AcademicStanding)
+	}
+	if req.DepartmentID != nil {
+		query.Set("department = ?", *req.DepartmentID)
+	}
+	if req.StartDate != nil {
+		query.Set("start_date = ?", *req.StartDate)
+	}
+	if req.EndDate != nil {
+		query.Set("end_date = ?", *req.EndDate)
+	}
+	if req.IsActive != nil {
+		query.Set("is_active = ?", *req.IsActive)
+	}
+
+	res, err := query.Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if affected == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return s.GetMemberTeacherByID(ctx, id)
+}
+
+func (s *Service) SoftDeleteMemberTeacherByID(ctx context.Context, id uuid.UUID) error {
+	return s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		res, err := tx.NewUpdate().
+			Model(&ent.MemberTeacher{}).
+			Set("is_active = ?", false).
+			Set("updated_at = now()").
+			Where("id = ?", id).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+
+		affected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected == 0 {
+			return sql.ErrNoRows
+		}
+
+		_, err = tx.NewDelete().Model(&ent.MemberTeacher{}).Where("id = ?", id).Exec(ctx)
+		return err
+	})
+}

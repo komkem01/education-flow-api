@@ -55,6 +55,14 @@ func apiSystem(r *gin.RouterGroup, mod *modules.Modules) {
 			academicYears.PATCH("/:id", mod.AcademicYears.Ctl.AcademicYearsUpdate)
 			academicYears.DELETE("/:id", mod.AcademicYears.Ctl.AcademicYearsDelete)
 		}
+		departments := system.Group("/departments")
+		{
+			departments.GET("", mod.Departments.Ctl.DepartmentsList)
+			departments.GET("/:id", mod.Departments.Ctl.DepartmentsInfo)
+			departments.POST("", mod.Departments.Ctl.CreateDepartmentController)
+			departments.PATCH("/:id", mod.Departments.Ctl.DepartmentsUpdate)
+			departments.DELETE("/:id", mod.Departments.Ctl.DepartmentsDelete)
+		}
 	}
 }
 
@@ -76,5 +84,41 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 		members.POST("", mod.Members.Ctl.CreateMemberController)
 		members.PATCH("/:id", mod.Members.Ctl.MembersUpdate)
 		members.DELETE("/:id", mod.Members.Ctl.MembersDelete)
+
+		teachers := members.Group("/teachers")
+		{
+			teachers.GET("", mod.MemberTeachers.Ctl.MemberTeachersList)
+			teachers.GET("/:id", mod.MemberTeachers.Ctl.MemberTeachersInfo)
+			teachers.POST("", mod.MemberTeachers.Ctl.CreateMemberTeacherController)
+			teachers.PATCH("/:id", mod.MemberTeachers.Ctl.MemberTeachersUpdate)
+			teachers.DELETE("/:id", mod.MemberTeachers.Ctl.MemberTeachersDelete)
+		}
+
+		educations := members.Group("/teacher-educations")
+		{
+			educations.GET("", mod.TeacherEducations.Ctl.TeacherEducationsList)
+			educations.GET("/:id", mod.TeacherEducations.Ctl.TeacherEducationsInfo)
+			educations.POST("", mod.TeacherEducations.Ctl.CreateTeacherEducationController)
+			educations.PATCH("/:id", mod.TeacherEducations.Ctl.TeacherEducationsUpdate)
+			educations.DELETE("/:id", mod.TeacherEducations.Ctl.TeacherEducationsDelete)
+		}
+
+		experiences := members.Group("/teacher-experiences")
+		{
+			experiences.GET("", mod.TeacherExperiences.Ctl.TeacherExperiencesList)
+			experiences.GET("/:id", mod.TeacherExperiences.Ctl.TeacherExperiencesInfo)
+			experiences.POST("", mod.TeacherExperiences.Ctl.CreateTeacherExperienceController)
+			experiences.PATCH("/:id", mod.TeacherExperiences.Ctl.TeacherExperiencesUpdate)
+			experiences.DELETE("/:id", mod.TeacherExperiences.Ctl.TeacherExperiencesDelete)
+		}
+
+		requests := members.Group("/teacher-requests")
+		{
+			requests.GET("", mod.TeacherRequests.Ctl.TeacherRequestsList)
+			requests.GET("/:id", mod.TeacherRequests.Ctl.TeacherRequestsInfo)
+			requests.POST("", mod.TeacherRequests.Ctl.CreateTeacherRequestController)
+			requests.PATCH("/:id", mod.TeacherRequests.Ctl.TeacherRequestsUpdate)
+			requests.DELETE("/:id", mod.TeacherRequests.Ctl.TeacherRequestsDelete)
+		}
 	}
 }
