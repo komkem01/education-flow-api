@@ -19,6 +19,9 @@ type CurrentUser struct {
 func (s *Service) resolveCurrentUser(ctx context.Context, bearer string) (*CurrentUser, error) {
 	token := extractBearerToken(bearer)
 	if token == "" {
+		token = strings.TrimSpace(bearer)
+	}
+	if token == "" {
 		return nil, fmt.Errorf("%w", ErrAuthUnauthorized)
 	}
 

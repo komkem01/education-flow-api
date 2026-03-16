@@ -17,15 +17,22 @@ func (c *Controller) Refresh(ctx *gin.Context) {
 
 	var req RefreshRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		req.RefreshToken = ""
+	}
+
+	refreshToken := c.refreshTokenFromRequest(ctx, req.RefreshToken)
+	if refreshToken == "" {
 		base.BadRequest(ctx, "invalid-request", nil)
 		return
 	}
 
-	res, err := c.svc.Refresh(ctx.Request.Context(), req.RefreshToken)
+	res, err := c.svc.Refresh(ctx.Request.Context(), refreshToken)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "auth-refresh-failed")
 		return
 	}
+
+	c.writeAuthCookies(ctx, res.Token, res.RefreshToken)
 
 	base.Success(ctx, res, "success")
 }

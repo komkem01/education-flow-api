@@ -28,6 +28,8 @@ func (c *Controller) Login(ctx *gin.Context) {
 		return
 	}
 
+	c.writeAuthCookies(ctx, res.Token, res.RefreshToken)
+
 	base.Success(ctx, res, "success")
 }
 

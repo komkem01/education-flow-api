@@ -2,6 +2,8 @@ package routes
 
 import (
 	"net/http"
+	"os"
+	"strings"
 
 	"eduflow/app/modules"
 
@@ -27,12 +29,23 @@ func Router(app *gin.Engine, mod *modules.Modules) {
 		},
 	)
 
+	origins := []string{"http://localhost:3000", "http://127.0.0.1:3000"}
+	if raw := strings.TrimSpace(os.Getenv("CORS_ALLOW_ORIGINS")); raw != "" {
+		origins = make([]string, 0, len(strings.Split(raw, ",")))
+		for _, item := range strings.Split(raw, ",") {
+			origin := strings.TrimSpace(item)
+			if origin != "" {
+				origins = append(origins, origin)
+			}
+		}
+	}
+
 	app.Use(cors.New(cors.Config{
-		AllowAllOrigins:        true,
-		AllowMethods:           []string{"*"},
-		AllowHeaders:           []string{"*"},
+		AllowOrigins:           origins,
+		AllowMethods:           []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:           []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:          []string{"X-Trace-ID"},
 		AllowCredentials:       true,
-		AllowWildcard:          true,
 		AllowBrowserExtensions: true,
 		AllowWebSockets:        true,
 		AllowFiles:             false,

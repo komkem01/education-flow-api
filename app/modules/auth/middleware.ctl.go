@@ -10,7 +10,7 @@ const CurrentUserContextKey = "current_user"
 
 func (c *Controller) RequireAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		user, err := c.svc.resolveCurrentUser(ctx.Request.Context(), ctx.GetHeader("Authorization"))
+		user, err := c.svc.resolveCurrentUser(ctx.Request.Context(), c.accessTokenFromRequest(ctx))
 		if err != nil {
 			base.Unauthorized(ctx, "unauthorized", nil)
 			ctx.Abort()
