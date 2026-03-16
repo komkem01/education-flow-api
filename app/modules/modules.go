@@ -132,7 +132,7 @@ func modulesInit() {
 	storagesMod := storages.New(config.Conf[storages.Config](confMod.Svc), entitiesMod.Svc)
 	documentsMod := documents.New(config.Conf[documents.Config](confMod.Svc), s3Mod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	picturesMod := pictures.New(config.Conf[pictures.Config](confMod.Svc), s3Mod.Svc, entitiesMod.Svc, entitiesMod.Svc)
-	authMod := auth.New(config.Conf[auth.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
+	authMod := auth.New(config.Conf[auth.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	approvalsMod := approvals.New(
 		config.Conf[approvals.Config](confMod.Svc),
 		entitiesMod.Svc,
