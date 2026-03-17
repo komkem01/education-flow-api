@@ -126,17 +126,13 @@ func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.M
 		return nil, fmt.Errorf("%w", ErrMemberStudentConditionFail)
 	}
 
-	requireApproval := false
+	requireApproval := true
 	requestedByRole := ent.ApprovalActorRoleAdmin
 	switch actorRole {
 	case ent.MemberRoleSuperadmin, ent.MemberRoleAdmin:
-		requireApproval = false
+		requestedByRole = ent.ApprovalActorRoleAdmin
 	case ent.MemberRoleTeacher:
-		requireApproval = true
 		requestedByRole = ent.ApprovalActorRoleTeacher
-		if requestReason == nil {
-			return nil, fmt.Errorf("%w", ErrInvalidApprovalReason)
-		}
 	default:
 		return nil, fmt.Errorf("%w", ErrMemberStudentUnauthorized)
 	}

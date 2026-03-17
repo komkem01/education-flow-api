@@ -137,6 +137,34 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 			studentHealthProfiles.DELETE("/:id", mod.StudentHealthProfiles.Ctl.StudentHealthProfilesDelete)
 		}
 
+		studentRegistrationCases := members.Group("/student-registration-cases")
+		{
+			studentRegistrationCases.GET("", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesList)
+			studentRegistrationCases.GET("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesInfo)
+			studentRegistrationCases.POST("", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesCreate)
+			studentRegistrationCases.PATCH("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesUpdate)
+			studentRegistrationCases.DELETE("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesDelete)
+			studentRegistrationCases.GET("/:id/previous-education", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesPreviousEducationInfo)
+			studentRegistrationCases.PUT("/:id/previous-education", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesPreviousEducationUpsert)
+			studentRegistrationCases.GET("/:id/family-economic", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesFamilyEconomicInfo)
+			studentRegistrationCases.PUT("/:id/family-economic", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesFamilyEconomicUpsert)
+			studentRegistrationCases.GET("/:id/documents", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesDocumentsList)
+			studentRegistrationCases.PUT("/:id/documents", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesDocumentsReplace)
+			studentRegistrationCases.POST("/:id/submit", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesSubmit)
+			studentRegistrationCases.POST("/:id/approve", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesApprove)
+			studentRegistrationCases.POST("/:id/reject", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesReject)
+			studentRegistrationCases.POST("/:id/apply", mod.StudentRegistrationCases.Ctl.StudentRegistrationCasesApply)
+		}
+
+		studentRegistrationRules := members.Group("/student-registration-rules")
+		{
+			studentRegistrationRules.GET("", mod.StudentRegistrationCases.Ctl.StudentRegistrationRulesList)
+			studentRegistrationRules.GET("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationRulesInfo)
+			studentRegistrationRules.POST("", mod.StudentRegistrationCases.Ctl.StudentRegistrationRulesCreate)
+			studentRegistrationRules.PATCH("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationRulesUpdate)
+			studentRegistrationRules.DELETE("/:id", mod.StudentRegistrationCases.Ctl.StudentRegistrationRulesDelete)
+		}
+
 		managements := members.Group("/managements")
 		{
 			managements.GET("", mod.MemberManagements.Ctl.MemberManagementsList)

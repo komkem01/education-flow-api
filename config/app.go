@@ -35,6 +35,7 @@ import (
 	"eduflow/app/modules/studentguardians"
 	"eduflow/app/modules/studenthealthprofiles"
 	"eduflow/app/modules/studentprofiles"
+	"eduflow/app/modules/studentregistrationcases"
 	"eduflow/app/modules/subjectgroups"
 	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
@@ -103,6 +104,7 @@ type Config struct {
 	EnrollmentSubjects        enrollmentsubjects.Config
 	StudentProfiles           studentprofiles.Config
 	StudentHealthProfiles     studenthealthprofiles.Config
+	StudentRegistrationCases  studentregistrationcases.Config
 	MemberManagements         membermanagements.Config
 	MemberTeachers            memberteachers.Config
 	Reports                   reports.Config

@@ -16,7 +16,10 @@ type Options struct {
 	actionDB     entitiesinf.ApprovalActionEntity
 	memberDB     entitiesinf.MemberEntity
 	studentDB    entitiesinf.MemberStudentEntity
+	profileDB    entitiesinf.StudentProfileEntity
+	healthDB     entitiesinf.StudentHealthProfileEntity
 	managementDB entitiesinf.MemberManagementEntity
+	teacherDB    entitiesinf.MemberTeacherEntity
 }
 
 type Service struct {
@@ -25,7 +28,10 @@ type Service struct {
 	actionDB     entitiesinf.ApprovalActionEntity
 	memberDB     entitiesinf.MemberEntity
 	studentDB    entitiesinf.MemberStudentEntity
+	profileDB    entitiesinf.StudentProfileEntity
+	healthDB     entitiesinf.StudentHealthProfileEntity
 	managementDB entitiesinf.MemberManagementEntity
+	teacherDB    entitiesinf.MemberTeacherEntity
 }
 
 func newService(opt *Options) *Service {
@@ -35,6 +41,9 @@ func newService(opt *Options) *Service {
 		actionDB:     opt.actionDB,
 		memberDB:     opt.memberDB,
 		studentDB:    opt.studentDB,
+		profileDB:    opt.profileDB,
+		healthDB:     opt.healthDB,
 		managementDB: opt.managementDB,
+		teacherDB:    opt.teacherDB,
 	}
 }

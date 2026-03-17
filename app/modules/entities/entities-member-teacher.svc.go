@@ -164,6 +164,16 @@ func (s *Service) ListMemberTeachers(ctx context.Context, req *base.RequestPagin
 	teachers := make([]*ent.MemberTeacher, 0)
 	query := s.db.NewSelect().Model(&teachers)
 
+	// Hide not-yet-approved teacher registrations from the teacher directory.
+	query.Where(`not exists (
+		select 1
+		from approval_requests ar
+		where ar.subject_type = 'member_teacher'
+		  and ar.request_type = 'teacher_registration'
+		  and ar.current_status = 'pending'
+		  and ar.subject_id = mt.id
+	)`)
+
 	if isActive != nil {
 		query.Where("is_active = ?", *isActive)
 	}
@@ -269,6 +279,14 @@ func (s *Service) UpdateMemberTeacherByID(ctx context.Context, id uuid.UUID, req
 
 func (s *Service) SoftDeleteMemberTeacherByID(ctx context.Context, id uuid.UUID) error {
 	return s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		teacher := new(ent.MemberTeacher)
+		if err := tx.NewSelect().
+			Model(teacher).
+			Where("id = ?", id).
+			Scan(ctx); err != nil {
+			return err
+		}
+
 		res, err := tx.NewUpdate().
 			Model(&ent.MemberTeacher{}).
 			Set("is_active = ?", false).
@@ -287,7 +305,30 @@ func (s *Service) SoftDeleteMemberTeacherByID(ctx context.Context, id uuid.UUID)
 			return sql.ErrNoRows
 		}
 
-		_, err = tx.NewDelete().Model(&ent.MemberTeacher{}).Where("id = ?", id).Exec(ctx)
+		if _, err = tx.NewUpdate().
+			Model(&ent.MemberTeacher{}).
+			Set("deleted_at = now()").
+			Set("updated_at = now()").
+			Where("id = ?", id).
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		if _, err = tx.NewUpdate().
+			Model(&ent.Member{}).
+			Set("is_active = ?", false).
+			Set("updated_at = now()").
+			Where("id = ?", teacher.MemberID).
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		_, err = tx.NewUpdate().
+			Model(&ent.Member{}).
+			Set("deleted_at = now()").
+			Set("updated_at = now()").
+			Where("id = ?", teacher.MemberID).
+			Exec(ctx)
 		return err
 	})
 }

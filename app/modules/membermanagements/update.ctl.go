@@ -1,6 +1,8 @@
 package membermanagements
 
 import (
+	"eduflow/app/modules/auth"
+	"eduflow/app/modules/entities/ent"
 	"strings"
 
 	"eduflow/app/utils"
@@ -38,6 +40,7 @@ type UpdateRequest struct {
 	DepartmentIDCamel       *string `json:"departmentId"`
 	IsActive                *bool   `json:"is_active"`
 	IsActiveCamel           *bool   `json:"isActive"`
+	RequestReason           *string `json:"request_reason"`
 }
 
 func firstNonEmptyUpdateString(values ...*string) *string {
@@ -99,7 +102,22 @@ func (c *Controller) Update(ctx *gin.Context) {
 	req.DepartmentID = firstNonEmptyUpdateString(req.DepartmentID, req.DepartmentIDCamel)
 	req.IsActive = firstNonNilBool(req.IsActive, req.IsActiveCamel)
 
-	item, err := c.svc.Update(ctx.Request.Context(), id, &req)
+	currentUser, ok := auth.CurrentUserFromGin(ctx)
+	if !ok || currentUser.Member == nil {
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return
+	}
+
+	actorID := currentUser.Member.ID
+	actorRole := currentUser.Member.Role
+	switch actorRole {
+	case ent.MemberRoleSuperadmin, ent.MemberRoleAdmin:
+	default:
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return
+	}
+
+	item, err := c.svc.Update(ctx.Request.Context(), id, actorID, actorRole, &req)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "member-management-update-failed")
 		return

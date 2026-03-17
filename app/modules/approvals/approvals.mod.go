@@ -20,7 +20,10 @@ func New(
 	actionEnt entitiesinf.ApprovalActionEntity,
 	memberEnt entitiesinf.MemberEntity,
 	studentEnt entitiesinf.MemberStudentEntity,
+	profileEnt entitiesinf.StudentProfileEntity,
+	healthEnt entitiesinf.StudentHealthProfileEntity,
 	managementEnt entitiesinf.MemberManagementEntity,
+	teacherEnt entitiesinf.MemberTeacherEntity,
 ) *Module {
 	tracer := otel.Tracer("eduflow.modules.approvals")
 	svc := newService(&Options{
@@ -30,7 +33,10 @@ func New(
 		actionDB:     actionEnt,
 		memberDB:     memberEnt,
 		studentDB:    studentEnt,
+		profileDB:    profileEnt,
+		healthDB:     healthEnt,
 		managementDB: managementEnt,
+		teacherDB:    teacherEnt,
 	})
 
 	return &Module{tracer: tracer, Svc: svc, Ctl: newController(tracer, svc)}

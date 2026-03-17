@@ -38,6 +38,7 @@ import (
 	"eduflow/app/modules/studentguardians"
 	"eduflow/app/modules/studenthealthprofiles"
 	"eduflow/app/modules/studentprofiles"
+	"eduflow/app/modules/studentregistrationcases"
 	"eduflow/app/modules/subjectgroups"
 	"eduflow/app/modules/subjects"
 	"eduflow/app/modules/teachereducations"
@@ -97,6 +98,7 @@ type Modules struct {
 	EnrollmentSubjects        *enrollmentsubjects.Module
 	StudentProfiles           *studentprofiles.Module
 	StudentHealthProfiles     *studenthealthprofiles.Module
+	StudentRegistrationCases  *studentregistrationcases.Module
 	MemberManagements         *membermanagements.Module
 	MemberTeachers            *memberteachers.Module
 	Reports                   *reports.Module
@@ -147,12 +149,15 @@ func modulesInit() {
 		entitiesMod.Svc,
 		entitiesMod.Svc,
 		entitiesMod.Svc,
+		entitiesMod.Svc,
+		entitiesMod.Svc,
+		entitiesMod.Svc,
 	)
 	attendanceSessionsMod := attendancesessions.New(config.Conf[attendancesessions.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordsMod := attendancerecords.New(config.Conf[attendancerecords.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordLogsMod := attendancerecordlogs.New(config.Conf[attendancerecordlogs.Config](confMod.Svc), entitiesMod.Svc)
 	membersMod := members.New(config.Conf[members.Config](confMod.Svc), entitiesMod.Svc)
-	memberStudentsMod := memberstudents.New(config.Conf[memberstudents.Config](confMod.Svc), entitiesMod.Svc)
+	memberStudentsMod := memberstudents.New(config.Conf[memberstudents.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	memberGuardiansMod := memberguardians.New(config.Conf[memberguardians.Config](confMod.Svc), entitiesMod.Svc)
 	studentGuardiansMod := studentguardians.New(config.Conf[studentguardians.Config](confMod.Svc), entitiesMod.Svc)
 	studentEnrollmentsMod := studentenrollments.New(config.Conf[studentenrollments.Config](confMod.Svc), entitiesMod.Svc)
@@ -160,8 +165,9 @@ func modulesInit() {
 	enrollmentSubjectsMod := enrollmentsubjects.New(config.Conf[enrollmentsubjects.Config](confMod.Svc), entitiesMod.Svc)
 	studentProfilesMod := studentprofiles.New(config.Conf[studentprofiles.Config](confMod.Svc), entitiesMod.Svc)
 	studentHealthProfilesMod := studenthealthprofiles.New(config.Conf[studenthealthprofiles.Config](confMod.Svc), entitiesMod.Svc)
-	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
-	memberTeachersMod := memberteachers.New(config.Conf[memberteachers.Config](confMod.Svc), entitiesMod.Svc)
+	studentRegistrationCasesMod := studentregistrationcases.New(config.Conf[studentregistrationcases.Config](confMod.Svc), entitiesMod.Svc)
+	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
+	memberTeachersMod := memberteachers.New(config.Conf[memberteachers.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	reportsMod := reports.New(config.Conf[reports.Config](confMod.Svc), entitiesMod.Svc)
 	schoolDepartmentsMod := schooldepartments.New(config.Conf[schooldepartments.Config](confMod.Svc), entitiesMod.Svc)
 	teacherEducationsMod := teachereducations.New(config.Conf[teachereducations.Config](confMod.Svc), entitiesMod.Svc)
@@ -210,6 +216,7 @@ func modulesInit() {
 		EnrollmentSubjects:        enrollmentSubjectsMod,
 		StudentProfiles:           studentProfilesMod,
 		StudentHealthProfiles:     studentHealthProfilesMod,
+		StudentRegistrationCases:  studentRegistrationCasesMod,
 		MemberManagements:         memberManagementsMod,
 		MemberTeachers:            memberTeachersMod,
 		Reports:                   reportsMod,

@@ -129,7 +129,7 @@ func parseOptionalDate(v *string) (*time.Time, error) {
 	return &t, nil
 }
 
-func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string, addresses []ent.TeacherAddressInput) (*ent.TeacherRegistrationResult, error) {
+func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string, requestReason *string, addresses []ent.TeacherAddressInput) (*ent.TeacherRegistrationResult, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "memberteachers.service.register")
 	defer span.End()
 
@@ -162,6 +162,8 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 	if actorRole != ent.MemberRoleAdmin && actorRole != ent.MemberRoleSuperadmin {
 		return nil, fmt.Errorf("%w", ErrMemberTeacherUnauthorized)
 	}
+
+	requestedByRole := ent.ApprovalActorRoleAdmin
 
 	if strings.TrimSpace(password) == "" {
 		return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
@@ -200,7 +202,7 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 		MemberPasswordHash:      string(hashed),
 		MemberSchoolID:          schoolID,
 		MemberRole:              ent.MemberRoleTeacher,
-		MemberIsActive:          true,
+		MemberIsActive:          false,
 		MemberLastLogin:         nil,
 		TeacherGenderID:         genderID,
 		TeacherPrefixID:         prefixID,
@@ -216,8 +218,48 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 		TeacherDepartmentID:     departmentID,
 		TeacherStartDate:        startAt,
 		TeacherEndDate:          endAt,
-		TeacherIsActive:         true,
+		TeacherIsActive:         false,
 		TeacherAddresses:        normalizedAddresses,
+	})
+	if err != nil {
+		return nil, normalizeServiceError(err)
+	}
+
+	now := time.Now()
+	reason := normalizeTeacherOptional(requestReason)
+	payload := map[string]any{
+		"member_id":  result.Member.ID.String(),
+		"teacher_id": result.Teacher.ID.String(),
+	}
+	if reason != nil {
+		payload["reason"] = *reason
+	}
+
+	approval, err := s.approval.CreateApprovalRequest(ctx, &ent.ApprovalRequest{
+		RequestType:     "teacher_registration",
+		SubjectType:     "member_teacher",
+		SubjectID:       &result.Teacher.ID,
+		RequestedBy:     actorID,
+		RequestedByRole: requestedByRole,
+		Payload:         payload,
+		CurrentStatus:   ent.ApprovalRequestStatusPending,
+		SubmittedAt:     &now,
+	})
+	if err != nil {
+		return nil, normalizeServiceError(err)
+	}
+
+	_, err = s.action.CreateApprovalAction(ctx, &ent.ApprovalAction{
+		RequestID:   approval.ID,
+		Action:      ent.ApprovalActionTypeSubmit,
+		ActedBy:     actorID,
+		ActedByRole: requestedByRole,
+		Comment:     reason,
+		Metadata: map[string]any{
+			"source":     "memberteachers.create",
+			"teacher_id": result.Teacher.ID.String(),
+		},
+		CreatedAt: now,
 	})
 	if err != nil {
 		return nil, normalizeServiceError(err)

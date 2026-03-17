@@ -1,6 +1,7 @@
 package memberteachers
 
 import (
+	"eduflow/app/modules/auth"
 	"eduflow/app/modules/entities/ent"
 	"eduflow/app/utils"
 	"eduflow/app/utils/base"
@@ -14,23 +15,24 @@ type UpdateByIDRequest struct {
 }
 
 type UpdateRequest struct {
-	MemberID         *uuid.UUID               `json:"member_id"`
-	GenderID         *uuid.UUID               `json:"gender_id"`
-	PrefixID         *uuid.UUID               `json:"prefix_id"`
-	Code             *string                  `json:"code"`
-	CitizenID        *string                  `json:"citizen_id"`
-	FirstNameTH      *string                  `json:"first_name_th"`
-	LastNameTH       *string                  `json:"last_name_th"`
-	FirstNameEN      *string                  `json:"first_name_en"`
-	LastNameEN       *string                  `json:"last_name_en"`
-	Phone            *string                  `json:"phone"`
-	Position         *string                  `json:"position"`
-	AcademicStanding *string                  `json:"academic_standing"`
-	DepartmentID     *uuid.UUID               `json:"department_id"`
-	StartDate        *string                  `json:"start_date"`
-	EndDate          *string                  `json:"end_date"`
-	IsActive         *bool                    `json:"is_active"`
-	Addresses        *[]TeacherAddressRequest `json:"addresses"`
+	MemberID              *uuid.UUID               `json:"member_id"`
+	GenderID              *uuid.UUID               `json:"gender_id"`
+	PrefixID              *uuid.UUID               `json:"prefix_id"`
+	Code                  *string                  `json:"code"`
+	CitizenID             *string                  `json:"citizen_id"`
+	FirstNameTH           *string                  `json:"first_name_th"`
+	LastNameTH            *string                  `json:"last_name_th"`
+	FirstNameEN           *string                  `json:"first_name_en"`
+	LastNameEN            *string                  `json:"last_name_en"`
+	Phone                 *string                  `json:"phone"`
+	Position              *string                  `json:"position"`
+	AcademicStanding      *string                  `json:"academic_standing"`
+	DepartmentID          *uuid.UUID               `json:"department_id"`
+	StartDate             *string                  `json:"start_date"`
+	EndDate               *string                  `json:"end_date"`
+	IsActive              *bool                    `json:"is_active"`
+	ApprovalRequestReason *string                  `json:"approval_request_reason"`
+	Addresses             *[]TeacherAddressRequest `json:"addresses"`
 }
 
 func (c *Controller) Update(ctx *gin.Context) {
@@ -55,6 +57,19 @@ func (c *Controller) Update(ctx *gin.Context) {
 		return
 	}
 
+	currentUser, ok := auth.CurrentUserFromGin(ctx)
+	if !ok || currentUser.Member == nil {
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return
+	}
+
+	actorID := currentUser.Member.ID
+	actorRole := currentUser.Member.Role
+	if actorRole != ent.MemberRoleAdmin && actorRole != ent.MemberRoleSuperadmin {
+		base.Unauthorized(ctx, "unauthorized", nil)
+		return
+	}
+
 	var addresses *[]ent.TeacherAddressInput
 	if req.Addresses != nil {
 		rows := make([]ent.TeacherAddressInput, 0, len(*req.Addresses))
@@ -74,7 +89,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 		addresses = &rows
 	}
 
-	teacher, err := c.svc.Update(ctx.Request.Context(), id, &req, addresses)
+	teacher, err := c.svc.Update(ctx.Request.Context(), id, actorID, actorRole, &req, addresses)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "member-teacher-update-failed")
 		return
