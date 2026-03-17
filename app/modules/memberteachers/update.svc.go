@@ -10,11 +10,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest) (*ent.MemberTeacher, error) {
+func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest, addresses *[]ent.TeacherAddressInput) (*ent.MemberTeacher, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "memberteachers.service.update")
 	defer span.End()
 
-	if req.MemberID == nil && req.GenderID == nil && req.PrefixID == nil && req.Code == nil && req.CitizenID == nil && req.FirstNameTH == nil && req.LastNameTH == nil && req.FirstNameEN == nil && req.LastNameEN == nil && req.Phone == nil && req.Position == nil && req.AcademicStanding == nil && req.DepartmentID == nil && req.StartDate == nil && req.EndDate == nil && req.IsActive == nil {
+	if req.MemberID == nil && req.GenderID == nil && req.PrefixID == nil && req.Code == nil && req.CitizenID == nil && req.FirstNameTH == nil && req.LastNameTH == nil && req.FirstNameEN == nil && req.LastNameEN == nil && req.Phone == nil && req.Position == nil && req.AcademicStanding == nil && req.DepartmentID == nil && req.StartDate == nil && req.EndDate == nil && req.IsActive == nil && addresses == nil {
 		return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
 	}
 
@@ -54,6 +54,17 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest) 
 	teacher, err := s.db.UpdateMemberTeacherByID(ctx, id, payload)
 	if err != nil {
 		return nil, normalizeServiceError(err)
+	}
+
+	if addresses != nil {
+		normalizedAddresses, err := normalizeTeacherAddresses(*addresses)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := s.db.ReplaceTeacherAddressesByMemberTeacherID(ctx, id, normalizedAddresses); err != nil {
+			return nil, normalizeServiceError(err)
+		}
 	}
 
 	return teacher, nil

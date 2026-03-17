@@ -35,6 +35,8 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 		base.ValidateFailed(ctx, "invalid-phone", nil)
 	case errors.Is(err, ErrTeacherInvalidDateRange):
 		base.ValidateFailed(ctx, "invalid-date-range", nil)
+	case errors.Is(err, ErrTeacherAddressPrimaryDup):
+		base.ValidateFailed(ctx, "teacher-address-primary-duplicate", nil)
 	case errors.Is(err, ErrMemberTeacherConditionFail):
 		base.ValidateFailed(ctx, "condition-fail", nil)
 	case errors.Is(err, ErrMemberTeacherDuplicate):

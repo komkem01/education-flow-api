@@ -74,6 +74,7 @@ type TeacherRegistrationInput struct {
 	TeacherStartDate        time.Time
 	TeacherEndDate          *time.Time
 	TeacherIsActive         bool
+	TeacherAddresses        []TeacherAddressInput
 }
 
 type TeacherRegistrationResult struct {

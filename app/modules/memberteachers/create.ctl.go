@@ -13,22 +13,35 @@ import (
 )
 
 type CreateRequest struct {
-	SchoolID         string  `json:"school_id" binding:"required"`
-	Email            string  `json:"email" binding:"required,email"`
-	Password         string  `json:"password" binding:"required"`
-	GenderID         string  `json:"gender_id" binding:"required"`
-	PrefixID         string  `json:"prefix_id" binding:"required"`
-	CitizenID        string  `json:"citizen_id" binding:"required"`
-	FirstNameTH      string  `json:"first_name_th" binding:"required"`
-	LastNameTH       string  `json:"last_name_th" binding:"required"`
-	FirstNameEN      string  `json:"first_name_en" binding:"required"`
-	LastNameEN       string  `json:"last_name_en" binding:"required"`
-	Phone            string  `json:"phone" binding:"required"`
-	Position         string  `json:"position" binding:"required"`
-	AcademicStanding string  `json:"academic_standing" binding:"required"`
-	DepartmentID     string  `json:"department_id" binding:"required"`
-	StartDate        string  `json:"start_date" binding:"required"`
-	EndDate          *string `json:"end_date"`
+	SchoolID         string                  `json:"school_id" binding:"required"`
+	Email            string                  `json:"email" binding:"required,email"`
+	Password         string                  `json:"password" binding:"required"`
+	GenderID         string                  `json:"gender_id" binding:"required"`
+	PrefixID         string                  `json:"prefix_id" binding:"required"`
+	CitizenID        string                  `json:"citizen_id" binding:"required"`
+	FirstNameTH      string                  `json:"first_name_th" binding:"required"`
+	LastNameTH       string                  `json:"last_name_th" binding:"required"`
+	FirstNameEN      string                  `json:"first_name_en" binding:"required"`
+	LastNameEN       string                  `json:"last_name_en" binding:"required"`
+	Phone            string                  `json:"phone" binding:"required"`
+	Position         string                  `json:"position" binding:"required"`
+	AcademicStanding string                  `json:"academic_standing"`
+	DepartmentID     string                  `json:"department_id" binding:"required"`
+	StartDate        string                  `json:"start_date" binding:"required"`
+	EndDate          *string                 `json:"end_date"`
+	Addresses        []TeacherAddressRequest `json:"addresses"`
+}
+
+type TeacherAddressRequest struct {
+	HouseNo     string  `json:"house_no"`
+	Village     *string `json:"village"`
+	Road        *string `json:"road"`
+	Province    string  `json:"province"`
+	District    string  `json:"district"`
+	Subdistrict string  `json:"subdistrict"`
+	PostalCode  string  `json:"postal_code"`
+	IsPrimary   bool    `json:"is_primary"`
+	SortOrder   int     `json:"sort_order"`
 }
 
 type registerTeacherMemberResponse struct {
@@ -154,6 +167,21 @@ func (c *Controller) Create(ctx *gin.Context) {
 		return
 	}
 
+	addresses := make([]ent.TeacherAddressInput, 0, len(req.Addresses))
+	for _, addr := range req.Addresses {
+		addresses = append(addresses, ent.TeacherAddressInput{
+			HouseNo:     addr.HouseNo,
+			Village:     addr.Village,
+			Road:        addr.Road,
+			Province:    addr.Province,
+			District:    addr.District,
+			Subdistrict: addr.Subdistrict,
+			PostalCode:  addr.PostalCode,
+			IsPrimary:   addr.IsPrimary,
+			SortOrder:   addr.SortOrder,
+		})
+	}
+
 	teacher, err := c.svc.Create(
 		ctx.Request.Context(),
 		actorRole,
@@ -173,6 +201,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 		departmentID,
 		req.StartDate,
 		req.EndDate,
+		addresses,
 	)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "member-teacher-create-failed")

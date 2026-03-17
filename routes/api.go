@@ -150,6 +150,7 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 		{
 			teachers.GET("", mod.MemberTeachers.Ctl.MemberTeachersList)
 			teachers.GET("/:id", mod.MemberTeachers.Ctl.MemberTeachersInfo)
+			teachers.GET("/:id/addresses", mod.MemberTeachers.Ctl.MemberTeacherAddressesList)
 			teachers.POST("", mod.MemberTeachers.Ctl.CreateMemberTeacherController)
 			teachers.PATCH("/:id", mod.MemberTeachers.Ctl.MemberTeachersUpdate)
 			teachers.DELETE("/:id", mod.MemberTeachers.Ctl.MemberTeachersDelete)

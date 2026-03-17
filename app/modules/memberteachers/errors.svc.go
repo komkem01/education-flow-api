@@ -12,6 +12,7 @@ var (
 	ErrMemberTeacherDuplicate     = errors.New("member-teacher-duplicate")
 	ErrMemberTeacherUnauthorized  = errors.New("member-teacher-unauthorized")
 	ErrMemberTeacherConditionFail = errors.New("member-teacher-condition-fail")
+	ErrTeacherAddressPrimaryDup   = errors.New("teacher-address-primary-duplicate")
 	ErrTeacherInvalidEmail        = errors.New("invalid-email")
 	ErrTeacherInvalidPassword     = errors.New("invalid-password")
 	ErrTeacherInvalidCitizenID    = errors.New("invalid-citizen-id")
@@ -26,10 +27,21 @@ func normalizeServiceError(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("%w: %v", ErrMemberTeacherNotFound, err)
 	}
+	if isTeacherAddressPrimaryDuplicateError(err) {
+		return fmt.Errorf("%w: %v", ErrTeacherAddressPrimaryDup, err)
+	}
 	if isDuplicateKeyError(err) {
 		return fmt.Errorf("%w: %v", ErrMemberTeacherDuplicate, err)
 	}
 	return err
+}
+
+func isTeacherAddressPrimaryDuplicateError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "uq_teacher_addresses_primary_per_teacher")
 }
 
 func isDuplicateKeyError(err error) bool {

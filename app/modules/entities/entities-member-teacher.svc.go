@@ -60,6 +60,29 @@ func (s *Service) RegisterTeacher(ctx context.Context, data *ent.TeacherRegistra
 			return err
 		}
 
+		if len(data.TeacherAddresses) > 0 {
+			addresses := make([]*ent.TeacherAddress, 0, len(data.TeacherAddresses))
+			for _, addr := range data.TeacherAddresses {
+				addresses = append(addresses, &ent.TeacherAddress{
+					MemberTeacherID: teacher.ID,
+					HouseNo:         addr.HouseNo,
+					Village:         addr.Village,
+					Road:            addr.Road,
+					Province:        addr.Province,
+					District:        addr.District,
+					Subdistrict:     addr.Subdistrict,
+					PostalCode:      addr.PostalCode,
+					IsPrimary:       addr.IsPrimary,
+					SortOrder:       addr.SortOrder,
+					IsActive:        true,
+				})
+			}
+
+			if _, err := tx.NewInsert().Model(&addresses).Exec(ctx); err != nil {
+				return err
+			}
+		}
+
 		result.Member = member
 		result.Teacher = teacher
 		return nil
@@ -78,6 +101,59 @@ func (s *Service) GetMemberTeacherByID(ctx context.Context, id uuid.UUID) (*ent.
 	}
 
 	return teacher, nil
+}
+
+func (s *Service) ListTeacherAddressesByMemberTeacherID(ctx context.Context, memberTeacherID uuid.UUID) ([]*ent.TeacherAddress, error) {
+	items := make([]*ent.TeacherAddress, 0)
+	if err := s.db.NewSelect().
+		Model(&items).
+		Where("member_teacher_id = ?", memberTeacherID).
+		Order("is_primary DESC").
+		Order("sort_order ASC").
+		Order("created_at ASC").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func (s *Service) ReplaceTeacherAddressesByMemberTeacherID(ctx context.Context, memberTeacherID uuid.UUID, addresses []ent.TeacherAddressInput) error {
+	return s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		if _, err := tx.NewDelete().
+			Model(&ent.TeacherAddress{}).
+			Where("member_teacher_id = ?", memberTeacherID).
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		if len(addresses) == 0 {
+			return nil
+		}
+
+		items := make([]*ent.TeacherAddress, 0, len(addresses))
+		for _, addr := range addresses {
+			items = append(items, &ent.TeacherAddress{
+				MemberTeacherID: memberTeacherID,
+				HouseNo:         addr.HouseNo,
+				Village:         addr.Village,
+				Road:            addr.Road,
+				Province:        addr.Province,
+				District:        addr.District,
+				Subdistrict:     addr.Subdistrict,
+				PostalCode:      addr.PostalCode,
+				IsPrimary:       addr.IsPrimary,
+				SortOrder:       addr.SortOrder,
+				IsActive:        true,
+			})
+		}
+
+		if _, err := tx.NewInsert().Model(&items).Exec(ctx); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func (s *Service) ListMemberTeachers(ctx context.Context, req *base.RequestPaginate, isActive *bool, memberID *uuid.UUID, departmentID *uuid.UUID) ([]*ent.MemberTeacher, *base.ResponsePaginate, error) {

@@ -6,6 +6,7 @@ import (
 
 	"eduflow/app/modules/entities/ent"
 	"eduflow/app/utils"
+	"eduflow/app/utils/base"
 
 	"github.com/google/uuid"
 )
@@ -16,6 +17,25 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest) 
 
 	if req.EmergencyContactName == nil && req.Relationship == nil && req.PhonePrimary == nil && req.PhoneSecondary == nil && req.CanDecideMedical == nil && req.IsPrimary == nil {
 		return nil, fmt.Errorf("%w", ErrTeacherEmergencyContactConditionFail)
+	}
+
+	if req.IsPrimary != nil && *req.IsPrimary {
+		current, err := s.db.GetTeacherEmergencyContactByID(ctx, id)
+		if err != nil {
+			return nil, normalizeServiceError(err)
+		}
+
+		primaryOnly := true
+		items, _, err := s.db.ListTeacherEmergencyContacts(ctx, &base.RequestPaginate{Page: 1, Size: 5}, &current.MemberTeacherID, &primaryOnly)
+		if err != nil {
+			return nil, normalizeServiceError(err)
+		}
+
+		for _, item := range items {
+			if item != nil && item.ID != id {
+				return nil, ErrTeacherEmergencyPrimaryDup
+			}
+		}
 	}
 
 	payload := &ent.TeacherEmergencyContactUpdate{

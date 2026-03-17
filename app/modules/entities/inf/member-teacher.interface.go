@@ -13,6 +13,8 @@ type MemberTeacherEntity interface {
 	CreateMemberTeacher(ctx context.Context, teacher *ent.MemberTeacher) (*ent.MemberTeacher, error)
 	RegisterTeacher(ctx context.Context, data *ent.TeacherRegistrationInput) (*ent.TeacherRegistrationResult, error)
 	GetMemberTeacherByID(ctx context.Context, id uuid.UUID) (*ent.MemberTeacher, error)
+	ListTeacherAddressesByMemberTeacherID(ctx context.Context, memberTeacherID uuid.UUID) ([]*ent.TeacherAddress, error)
+	ReplaceTeacherAddressesByMemberTeacherID(ctx context.Context, memberTeacherID uuid.UUID, addresses []ent.TeacherAddressInput) error
 	ListMemberTeachers(ctx context.Context, req *base.RequestPaginate, isActive *bool, memberID *uuid.UUID, departmentID *uuid.UUID) ([]*ent.MemberTeacher, *base.ResponsePaginate, error)
 	UpdateMemberTeacherByID(ctx context.Context, id uuid.UUID, req *ent.MemberTeacherUpdate) (*ent.MemberTeacher, error)
 	SoftDeleteMemberTeacherByID(ctx context.Context, id uuid.UUID) error

@@ -12,6 +12,7 @@ var (
 	ErrTeacherEmergencyContactDuplicate     = errors.New("teacher-emergency-contact-duplicate")
 	ErrTeacherEmergencyContactUnauthorized  = errors.New("teacher-emergency-contact-unauthorized")
 	ErrTeacherEmergencyContactConditionFail = errors.New("teacher-emergency-contact-condition-fail")
+	ErrTeacherEmergencyPrimaryDup           = errors.New("teacher-emergency-primary-duplicate")
 )
 
 func normalizeServiceError(err error) error {
@@ -21,10 +22,21 @@ func normalizeServiceError(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("%w: %v", ErrTeacherEmergencyContactNotFound, err)
 	}
+	if isPrimaryDuplicateError(err) {
+		return fmt.Errorf("%w: %v", ErrTeacherEmergencyPrimaryDup, err)
+	}
 	if isDuplicateKeyError(err) {
 		return fmt.Errorf("%w: %v", ErrTeacherEmergencyContactDuplicate, err)
 	}
 	return err
+}
+
+func isPrimaryDuplicateError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "uq_teacher_emergency_contacts_primary_per_teacher")
 }
 
 func isDuplicateKeyError(err error) bool {

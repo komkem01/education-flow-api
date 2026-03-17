@@ -25,6 +25,8 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 		base.BadRequest(ctx, "teacher-emergency-contact-not-found", nil)
 	case errors.Is(err, ErrTeacherEmergencyContactUnauthorized):
 		base.Unauthorized(ctx, "unauthorized", nil)
+	case errors.Is(err, ErrTeacherEmergencyPrimaryDup):
+		base.ValidateFailed(ctx, "teacher-emergency-primary-duplicate", nil)
 	case errors.Is(err, ErrTeacherEmergencyContactConditionFail):
 		base.ValidateFailed(ctx, "condition-fail", nil)
 	case errors.Is(err, ErrTeacherEmergencyContactDuplicate):

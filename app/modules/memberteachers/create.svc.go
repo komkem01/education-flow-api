@@ -21,6 +21,60 @@ func normalizeTeacherRequired(v string) string {
 	return strings.TrimSpace(v)
 }
 
+func normalizeTeacherOptional(v *string) *string {
+	if v == nil {
+		return nil
+	}
+	trimmed := strings.TrimSpace(*v)
+	if trimmed == "" {
+		return nil
+	}
+	return &trimmed
+}
+
+func normalizeTeacherAddresses(addresses []ent.TeacherAddressInput) ([]ent.TeacherAddressInput, error) {
+	if len(addresses) == 0 {
+		return nil, nil
+	}
+
+	normalized := make([]ent.TeacherAddressInput, 0, len(addresses))
+	primaryCount := 0
+	for i, addr := range addresses {
+		h := strings.TrimSpace(addr.HouseNo)
+		p := strings.TrimSpace(addr.Province)
+		d := strings.TrimSpace(addr.District)
+		s := strings.TrimSpace(addr.Subdistrict)
+		pc := strings.TrimSpace(addr.PostalCode)
+		if h == "" || p == "" || d == "" || s == "" || pc == "" {
+			return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
+		}
+
+		normalized = append(normalized, ent.TeacherAddressInput{
+			HouseNo:     h,
+			Village:     normalizeTeacherOptional(addr.Village),
+			Road:        normalizeTeacherOptional(addr.Road),
+			Province:    p,
+			District:    d,
+			Subdistrict: s,
+			PostalCode:  pc,
+			IsPrimary:   addr.IsPrimary,
+			SortOrder:   i + 1,
+		})
+		if addr.IsPrimary {
+			primaryCount += 1
+		}
+	}
+
+	if primaryCount > 1 {
+		return nil, ErrTeacherAddressPrimaryDup
+	}
+	if primaryCount == 0 {
+		return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
+	}
+
+	return normalized, nil
+}
+
 func validateTeacherEmailPassword(email string, password string) (string, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
 	if email == "" {
@@ -75,7 +129,7 @@ func parseOptionalDate(v *string) (*time.Time, error) {
 	return &t, nil
 }
 
-func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string) (*ent.TeacherRegistrationResult, error) {
+func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string, addresses []ent.TeacherAddressInput) (*ent.TeacherRegistrationResult, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "memberteachers.service.register")
 	defer span.End()
 
@@ -90,8 +144,11 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 	lastNameEN = normalizeTeacherRequired(lastNameEN)
 	position = normalizeTeacherRequired(position)
 	academicStanding = normalizeTeacherRequired(academicStanding)
-	if firstNameTH == "" || lastNameTH == "" || firstNameEN == "" || lastNameEN == "" || position == "" || academicStanding == "" {
+	if firstNameTH == "" || lastNameTH == "" || firstNameEN == "" || lastNameEN == "" || position == "" {
 		return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
+	}
+	if academicStanding == "" {
+		academicStanding = "-"
 	}
 	citizenID, err = validateTeacherCitizenID(citizenID)
 	if err != nil {
@@ -121,6 +178,11 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 	}
 	if endAt != nil && endAt.Before(startAt) {
 		return nil, fmt.Errorf("%w", ErrTeacherInvalidDateRange)
+	}
+
+	normalizedAddresses, err := normalizeTeacherAddresses(addresses)
+	if err != nil {
+		return nil, err
 	}
 
 	hashed, err := hashing.HashPassword(password)
@@ -155,6 +217,7 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 		TeacherStartDate:        startAt,
 		TeacherEndDate:          endAt,
 		TeacherIsActive:         true,
+		TeacherAddresses:        normalizedAddresses,
 	})
 	if err != nil {
 		return nil, normalizeServiceError(err)
