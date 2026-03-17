@@ -75,7 +75,7 @@ func parseOptionalDate(v *string) (*time.Time, error) {
 	return &t, nil
 }
 
-func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, code string, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string) (*ent.TeacherRegistrationResult, error) {
+func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, citizenID string, firstNameTH string, lastNameTH string, firstNameEN string, lastNameEN string, phone string, position string, academicStanding string, departmentID uuid.UUID, startDate string, endDate *string) (*ent.TeacherRegistrationResult, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "memberteachers.service.register")
 	defer span.End()
 
@@ -84,14 +84,13 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 	if err != nil {
 		return nil, err
 	}
-	code = normalizeTeacherRequired(code)
 	firstNameTH = normalizeTeacherRequired(firstNameTH)
 	lastNameTH = normalizeTeacherRequired(lastNameTH)
 	firstNameEN = normalizeTeacherRequired(firstNameEN)
 	lastNameEN = normalizeTeacherRequired(lastNameEN)
 	position = normalizeTeacherRequired(position)
 	academicStanding = normalizeTeacherRequired(academicStanding)
-	if code == "" || firstNameTH == "" || lastNameTH == "" || firstNameEN == "" || lastNameEN == "" || position == "" || academicStanding == "" {
+	if firstNameTH == "" || lastNameTH == "" || firstNameEN == "" || lastNameEN == "" || position == "" || academicStanding == "" {
 		return nil, fmt.Errorf("%w", ErrMemberTeacherConditionFail)
 	}
 	citizenID, err = validateTeacherCitizenID(citizenID)
@@ -125,6 +124,11 @@ func (s *Service) Create(ctx context.Context, actorRole ent.MemberRole, schoolID
 	}
 
 	hashed, err := hashing.HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	code, err := utils.GenerateNumericCode("TCH", 6)
 	if err != nil {
 		return nil, err
 	}

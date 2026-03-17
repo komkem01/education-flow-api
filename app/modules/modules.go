@@ -26,7 +26,10 @@ import (
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/pictures"
 	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/reports"
 	"eduflow/app/modules/s3"
+	"eduflow/app/modules/schoolannouncements"
+	"eduflow/app/modules/schooldepartments"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
@@ -74,6 +77,7 @@ type Modules struct {
 	Classrooms                *classrooms.Module
 	SubjectGroups             *subjectgroups.Module
 	Subjects                  *subjects.Module
+	SchoolAnnouncements       *schoolannouncements.Module
 	AuditLogs                 *auditlogs.Module
 	S3                        *s3.Module
 	Storages                  *storages.Module
@@ -95,6 +99,8 @@ type Modules struct {
 	StudentHealthProfiles     *studenthealthprofiles.Module
 	MemberManagements         *membermanagements.Module
 	MemberTeachers            *memberteachers.Module
+	Reports                   *reports.Module
+	SchoolDepartments         *schooldepartments.Module
 	TeacherEducations         *teachereducations.Module
 	TeacherEmergencyContacts  *teacheremergencycontacts.Module
 	TeacherLicenses           *teacherlicenses.Module
@@ -127,6 +133,7 @@ func modulesInit() {
 	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)
 	subjectGroupsMod := subjectgroups.New(config.Conf[subjectgroups.Config](confMod.Svc), entitiesMod.Svc)
 	subjectsMod := subjects.New(config.Conf[subjects.Config](confMod.Svc), entitiesMod.Svc)
+	schoolAnnouncementsMod := schoolannouncements.New(config.Conf[schoolannouncements.Config](confMod.Svc), entitiesMod.Svc)
 	auditLogsMod := auditlogs.New(config.Conf[auditlogs.Config](confMod.Svc), entitiesMod.Svc)
 	s3Mod := s3.New(config.Conf[s3.Config](confMod.Svc))
 	storagesMod := storages.New(config.Conf[storages.Config](confMod.Svc), entitiesMod.Svc)
@@ -153,8 +160,10 @@ func modulesInit() {
 	enrollmentSubjectsMod := enrollmentsubjects.New(config.Conf[enrollmentsubjects.Config](confMod.Svc), entitiesMod.Svc)
 	studentProfilesMod := studentprofiles.New(config.Conf[studentprofiles.Config](confMod.Svc), entitiesMod.Svc)
 	studentHealthProfilesMod := studenthealthprofiles.New(config.Conf[studenthealthprofiles.Config](confMod.Svc), entitiesMod.Svc)
-	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc)
+	memberManagementsMod := membermanagements.New(config.Conf[membermanagements.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	memberTeachersMod := memberteachers.New(config.Conf[memberteachers.Config](confMod.Svc), entitiesMod.Svc)
+	reportsMod := reports.New(config.Conf[reports.Config](confMod.Svc), entitiesMod.Svc)
+	schoolDepartmentsMod := schooldepartments.New(config.Conf[schooldepartments.Config](confMod.Svc), entitiesMod.Svc)
 	teacherEducationsMod := teachereducations.New(config.Conf[teachereducations.Config](confMod.Svc), entitiesMod.Svc)
 	teacherEmergencyContactsMod := teacheremergencycontacts.New(config.Conf[teacheremergencycontacts.Config](confMod.Svc), entitiesMod.Svc)
 	teacherLicensesMod := teacherlicenses.New(config.Conf[teacherlicenses.Config](confMod.Svc), entitiesMod.Svc)
@@ -181,6 +190,7 @@ func modulesInit() {
 		Classrooms:                classroomsMod,
 		SubjectGroups:             subjectGroupsMod,
 		Subjects:                  subjectsMod,
+		SchoolAnnouncements:       schoolAnnouncementsMod,
 		AuditLogs:                 auditLogsMod,
 		S3:                        s3Mod,
 		Storages:                  storagesMod,
@@ -202,6 +212,8 @@ func modulesInit() {
 		StudentHealthProfiles:     studentHealthProfilesMod,
 		MemberManagements:         memberManagementsMod,
 		MemberTeachers:            memberTeachersMod,
+		Reports:                   reportsMod,
+		SchoolDepartments:         schoolDepartmentsMod,
 		TeacherEducations:         teacherEducationsMod,
 		TeacherEmergencyContacts:  teacherEmergencyContactsMod,
 		TeacherLicenses:           teacherLicensesMod,

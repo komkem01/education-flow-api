@@ -12,9 +12,10 @@ import (
 
 type ListRequest struct {
 	base.RequestPaginate
-	IsActive     *bool  `form:"is_active"`
-	MemberID     string `form:"member_id"`
-	DepartmentID string `form:"department_id"`
+	IsActive           *bool  `form:"is_active"`
+	MemberID           string `form:"member_id"`
+	DepartmentID       string `form:"department_id"`
+	SchoolDepartmentID string `form:"school_department_id"`
 }
 
 func (c *Controller) List(ctx *gin.Context) {
@@ -56,7 +57,17 @@ func (c *Controller) List(ctx *gin.Context) {
 		departmentID = &parsed
 	}
 
-	items, page, err := c.svc.List(ctx.Request.Context(), &req.RequestPaginate, req.IsActive, memberID, departmentID)
+	var schoolDepartmentID *uuid.UUID
+	if req.SchoolDepartmentID != "" {
+		parsed, err := uuid.Parse(req.SchoolDepartmentID)
+		if err != nil {
+			base.BadRequest(ctx, "invalid-school-department-id", nil)
+			return
+		}
+		schoolDepartmentID = &parsed
+	}
+
+	items, page, err := c.svc.List(ctx.Request.Context(), &req.RequestPaginate, req.IsActive, memberID, departmentID, schoolDepartmentID)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "member-management-list-failed")
 		return

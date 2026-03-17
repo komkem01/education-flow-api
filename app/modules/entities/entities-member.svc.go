@@ -15,6 +15,21 @@ import (
 
 var _ entitiesinf.MemberEntity = (*Service)(nil)
 
+func (s *Service) CountMembersBySchoolAndRole(ctx context.Context, schoolID uuid.UUID, role ent.MemberRole) (int64, error) {
+	query := s.db.NewSelect().
+		Model((*ent.Member)(nil)).
+		ColumnExpr("COUNT(*)").
+		Where("school_id = ?", schoolID).
+		Where("role = ?", role)
+
+	var total int64
+	if err := query.Scan(ctx, &total); err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
 func (s *Service) CreateMember(ctx context.Context, schoolID uuid.UUID, email string, password string, role ent.MemberRole, isActive bool, lastLogin *time.Time) (*ent.Member, error) {
 	item := &ent.Member{
 		SchoolID:  schoolID,

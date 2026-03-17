@@ -11,6 +11,7 @@ type Department struct {
 	bun.BaseModel `bun:"table:departments,alias:d"`
 
 	ID        uuid.UUID  `bun:"id,pk,type:uuid,default:gen_random_uuid()"`
+	Code      string     `bun:"code,notnull,type:varchar(50)"`
 	Name      string     `bun:"name,notnull,unique"`
 	IsActive  bool       `bun:"is_active,notnull,default:true"`
 	CreatedAt time.Time  `bun:"created_at,notnull,default:current_timestamp"`

@@ -272,10 +272,35 @@ func apiManagement(r *gin.RouterGroup, mod *modules.Modules) {
 			subjects.DELETE("/:id", mod.Subjects.Ctl.SubjectsDelete)
 		}
 
+		schoolAnnouncements := management.Group("/school-announcements")
+		{
+			schoolAnnouncements.GET("", mod.SchoolAnnouncements.Ctl.SchoolAnnouncementsList)
+			schoolAnnouncements.GET("/:id", mod.SchoolAnnouncements.Ctl.SchoolAnnouncementsInfo)
+			schoolAnnouncements.POST("", mod.SchoolAnnouncements.Ctl.CreateSchoolAnnouncementController)
+			schoolAnnouncements.PATCH("/:id", mod.SchoolAnnouncements.Ctl.SchoolAnnouncementsUpdate)
+			schoolAnnouncements.DELETE("/:id", mod.SchoolAnnouncements.Ctl.SchoolAnnouncementsDelete)
+		}
+
 		auditLogs := management.Group("/audit-logs")
 		{
 			auditLogs.GET("", mod.AuditLogs.Ctl.AuditLogsList)
 			auditLogs.GET("/:id", mod.AuditLogs.Ctl.AuditLogsInfo)
+		}
+
+		reports := management.Group("/reports")
+		{
+			reports.GET("/filters", mod.Reports.Ctl.ReportsFilters)
+			reports.GET("/summary", mod.Reports.Ctl.ReportsSummary)
+			reports.GET("/:id", mod.Reports.Ctl.ReportsInfo)
+		}
+
+		schoolDepartments := management.Group("/school-departments")
+		{
+			schoolDepartments.GET("", mod.SchoolDepartments.Ctl.SchoolDepartmentsList)
+			schoolDepartments.GET("/:id", mod.SchoolDepartments.Ctl.SchoolDepartmentsInfo)
+			schoolDepartments.POST("", mod.SchoolDepartments.Ctl.CreateSchoolDepartmentController)
+			schoolDepartments.PATCH("/:id", mod.SchoolDepartments.Ctl.SchoolDepartmentsUpdate)
+			schoolDepartments.DELETE("/:id", mod.SchoolDepartments.Ctl.SchoolDepartmentsDelete)
 		}
 
 		storages := management.Group("/storages")

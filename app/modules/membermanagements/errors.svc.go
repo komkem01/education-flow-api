@@ -14,6 +14,7 @@ var (
 	ErrMemberManagementConditionFail = errors.New("member-management-condition-fail")
 	ErrManagementInvalidEmail        = errors.New("invalid-email")
 	ErrManagementInvalidPassword     = errors.New("invalid-password")
+	ErrManagementInvalidPhone        = errors.New("invalid-phone")
 	ErrManagementInvalidReason       = errors.New("invalid-request-reason")
 )
 

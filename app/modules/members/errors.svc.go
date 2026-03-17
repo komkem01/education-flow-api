@@ -12,6 +12,7 @@ var (
 	ErrMemberDuplicate     = errors.New("member-duplicate")
 	ErrMemberUnauthorized  = errors.New("member-unauthorized")
 	ErrMemberConditionFail = errors.New("member-condition-fail")
+	ErrMemberAdminLimit    = errors.New("member-admin-limit")
 )
 
 func normalizeServiceError(err error) error {

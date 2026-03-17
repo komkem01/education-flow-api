@@ -29,6 +29,8 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 		base.ValidateFailed(ctx, "invalid-email", nil)
 	case errors.Is(err, ErrManagementInvalidPassword):
 		base.ValidateFailed(ctx, "invalid-password", nil)
+	case errors.Is(err, ErrManagementInvalidPhone):
+		base.ValidateFailed(ctx, "invalid-phone", nil)
 	case errors.Is(err, ErrManagementInvalidReason):
 		base.ValidateFailed(ctx, "invalid-request-reason", nil)
 	case errors.Is(err, ErrMemberManagementConditionFail):

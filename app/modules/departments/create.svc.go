@@ -7,11 +7,11 @@ import (
 	"eduflow/app/utils"
 )
 
-func (s *Service) Create(ctx context.Context, name string, isActive bool) (*ent.Department, error) {
+func (s *Service) Create(ctx context.Context, code string, name string, isActive bool) (*ent.Department, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "departments.service.create")
 	defer span.End()
 
-	department, err := s.db.CreateDepartment(ctx, name, isActive)
+	department, err := s.db.CreateDepartment(ctx, code, name, isActive)
 	if err != nil {
 		return nil, normalizeServiceError(err)
 	}
@@ -19,6 +19,6 @@ func (s *Service) Create(ctx context.Context, name string, isActive bool) (*ent.
 	return department, nil
 }
 
-func (s *Service) CreateDepartmentService(ctx context.Context, name string, isActive bool) (*ent.Department, error) {
-	return s.Create(ctx, name, isActive)
+func (s *Service) CreateDepartmentService(ctx context.Context, code string, name string, isActive bool) (*ent.Department, error) {
+	return s.Create(ctx, code, name, isActive)
 }

@@ -21,6 +21,14 @@ func normalizeRequired(v string) string {
 	return strings.TrimSpace(v)
 }
 
+func isStudentCodeDuplicateError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "ux_member_students_school_student_code") || strings.Contains(errStr, "student_code")
+}
+
 func normalizeOptional(v *string) *string {
 	if v == nil {
 		return nil
@@ -73,7 +81,7 @@ func validateOptionalPhone(v *string) (*string, error) {
 	return v, nil
 }
 
-func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, advisorTeacherID *uuid.UUID, studentCode string, firstNameTH string, lastNameTH string, firstNameEN *string, lastNameEN *string, citizenID *string, phone *string, birthDate *string, nationality *string, religion *string, addressCurrent *string, addressRegistered *string, emergencyContactName *string, emergencyContactPhone *string, requestReason *string) (*ent.StudentRegistrationResult, error) {
+func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.MemberRole, schoolID uuid.UUID, email string, password string, genderID uuid.UUID, prefixID uuid.UUID, advisorTeacherID *uuid.UUID, firstNameTH string, lastNameTH string, firstNameEN *string, lastNameEN *string, citizenID *string, phone *string, birthDate *string, nationality *string, religion *string, addressCurrent *string, addressRegistered *string, emergencyContactName *string, emergencyContactPhone *string, requestReason *string) (*ent.StudentRegistrationResult, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "memberstudents.service.register")
 	defer span.End()
 
@@ -83,10 +91,9 @@ func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.M
 		return nil, err
 	}
 
-	studentCode = normalizeRequired(studentCode)
 	firstNameTH = normalizeRequired(firstNameTH)
 	lastNameTH = normalizeRequired(lastNameTH)
-	if studentCode == "" || firstNameTH == "" || lastNameTH == "" {
+	if firstNameTH == "" || lastNameTH == "" {
 		return nil, fmt.Errorf("%w", ErrMemberStudentConditionFail)
 	}
 
@@ -154,40 +161,52 @@ func (s *Service) Create(ctx context.Context, actorID uuid.UUID, actorRole ent.M
 		birthDateVal = &parsed
 	}
 
-	item, err := s.db.RegisterStudent(ctx, &ent.StudentRegistrationInput{
-		MemberEmail:                  email,
-		MemberPasswordHash:           string(hashed),
-		MemberSchoolID:               schoolID,
-		MemberRole:                   ent.MemberRoleStudent,
-		MemberIsActive:               memberActive,
-		MemberLastLogin:              nil,
-		StudentSchoolID:              schoolID,
-		StudentGenderID:              genderID,
-		StudentPrefixID:              prefixID,
-		StudentAdvisorTeacherID:      advisorTeacherID,
-		StudentCode:                  studentCode,
-		StudentFirstNameTH:           firstNameTH,
-		StudentLastNameTH:            lastNameTH,
-		StudentFirstNameEN:           firstNameEN,
-		StudentLastNameEN:            lastNameEN,
-		StudentCitizenID:             citizenID,
-		StudentPhone:                 phone,
-		StudentIsActive:              studentActive,
-		ProfileBirthDate:             birthDateVal,
-		ProfileNationality:           nationality,
-		ProfileReligion:              religion,
-		ProfileAddressCurrent:        addressCurrent,
-		ProfileAddressRegistered:     addressRegistered,
-		ProfileEmergencyContactName:  emergencyContactName,
-		ProfileEmergencyContactPhone: emergencyContactPhone,
-		RequireApproval:              requireApproval,
-		RequestedBy:                  actorID,
-		RequestedByRole:              requestedByRole,
-		RequestReason:                requestReason,
-	})
-	if err != nil {
-		return nil, normalizeServiceError(err)
+	const maxStudentCodeRetry = 10
+	for i := 0; i < maxStudentCodeRetry; i++ {
+		studentCode, genErr := utils.GenerateNumericCode("STD", 6)
+		if genErr != nil {
+			return nil, genErr
+		}
+
+		item, registerErr := s.db.RegisterStudent(ctx, &ent.StudentRegistrationInput{
+			MemberEmail:                  email,
+			MemberPasswordHash:           string(hashed),
+			MemberSchoolID:               schoolID,
+			MemberRole:                   ent.MemberRoleStudent,
+			MemberIsActive:               memberActive,
+			MemberLastLogin:              nil,
+			StudentSchoolID:              schoolID,
+			StudentGenderID:              genderID,
+			StudentPrefixID:              prefixID,
+			StudentAdvisorTeacherID:      advisorTeacherID,
+			StudentCode:                  studentCode,
+			StudentFirstNameTH:           firstNameTH,
+			StudentLastNameTH:            lastNameTH,
+			StudentFirstNameEN:           firstNameEN,
+			StudentLastNameEN:            lastNameEN,
+			StudentCitizenID:             citizenID,
+			StudentPhone:                 phone,
+			StudentIsActive:              studentActive,
+			ProfileBirthDate:             birthDateVal,
+			ProfileNationality:           nationality,
+			ProfileReligion:              religion,
+			ProfileAddressCurrent:        addressCurrent,
+			ProfileAddressRegistered:     addressRegistered,
+			ProfileEmergencyContactName:  emergencyContactName,
+			ProfileEmergencyContactPhone: emergencyContactPhone,
+			RequireApproval:              requireApproval,
+			RequestedBy:                  actorID,
+			RequestedByRole:              requestedByRole,
+			RequestReason:                requestReason,
+		})
+		if registerErr == nil {
+			return item, nil
+		}
+		if isDuplicateKeyError(registerErr) && isStudentCodeDuplicateError(registerErr) {
+			continue
+		}
+		return nil, normalizeServiceError(registerErr)
 	}
 
-	return item, nil
+	return nil, fmt.Errorf("%w", ErrMemberStudentDuplicate)
 }

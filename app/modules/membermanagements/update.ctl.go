@@ -1,6 +1,8 @@
 package membermanagements
 
 import (
+	"strings"
+
 	"eduflow/app/utils"
 	"eduflow/app/utils/base"
 
@@ -13,12 +15,53 @@ type UpdateByIDRequest struct {
 }
 
 type UpdateRequest struct {
-	MemberID      *string `json:"member_id"`
-	EmployeeCode  *string `json:"employee_code"`
-	Position      *string `json:"position"`
-	StartWorkDate *string `json:"start_work_date"`
-	DepartmentID  *string `json:"department_id"`
-	IsActive      *bool   `json:"is_active"`
+	MemberID                *string `json:"member_id"`
+	MemberIDCamel           *string `json:"memberId"`
+	EmployeeCode            *string `json:"employee_code"`
+	EmployeeCodeCamel       *string `json:"employeeCode"`
+	GenderID                *string `json:"gender_id"`
+	GenderIDCamel           *string `json:"genderId"`
+	PrefixID                *string `json:"prefix_id"`
+	PrefixIDCamel           *string `json:"prefixId"`
+	FirstName               *string `json:"first_name"`
+	FirstNameCamel          *string `json:"firstName"`
+	LastName                *string `json:"last_name"`
+	LastNameCamel           *string `json:"lastName"`
+	Phone                   *string `json:"phone"`
+	PhoneCamel              *string `json:"phoneNumber"`
+	Position                *string `json:"position"`
+	StartWorkDate           *string `json:"start_work_date"`
+	StartWorkDateCamel      *string `json:"startWorkDate"`
+	SchoolDepartmentID      *string `json:"school_department_id"`
+	SchoolDepartmentIDCamel *string `json:"schoolDepartmentId"`
+	DepartmentID            *string `json:"department_id"`
+	DepartmentIDCamel       *string `json:"departmentId"`
+	IsActive                *bool   `json:"is_active"`
+	IsActiveCamel           *bool   `json:"isActive"`
+}
+
+func firstNonEmptyUpdateString(values ...*string) *string {
+	for _, value := range values {
+		if value == nil {
+			continue
+		}
+		trimmed := strings.TrimSpace(*value)
+		if trimmed == "" {
+			continue
+		}
+		v := trimmed
+		return &v
+	}
+	return nil
+}
+
+func firstNonNilBool(values ...*bool) *bool {
+	for _, value := range values {
+		if value != nil {
+			return value
+		}
+	}
+	return nil
 }
 
 func (c *Controller) Update(ctx *gin.Context) {
@@ -42,6 +85,19 @@ func (c *Controller) Update(ctx *gin.Context) {
 		base.BadRequest(ctx, "invalid-request", nil)
 		return
 	}
+
+	req.MemberID = firstNonEmptyUpdateString(req.MemberID, req.MemberIDCamel)
+	req.EmployeeCode = firstNonEmptyUpdateString(req.EmployeeCode, req.EmployeeCodeCamel)
+	req.GenderID = firstNonEmptyUpdateString(req.GenderID, req.GenderIDCamel)
+	req.PrefixID = firstNonEmptyUpdateString(req.PrefixID, req.PrefixIDCamel)
+	req.FirstName = firstNonEmptyUpdateString(req.FirstName, req.FirstNameCamel)
+	req.LastName = firstNonEmptyUpdateString(req.LastName, req.LastNameCamel)
+	req.Phone = firstNonEmptyUpdateString(req.Phone, req.PhoneCamel)
+	req.Position = firstNonEmptyUpdateString(req.Position)
+	req.StartWorkDate = firstNonEmptyUpdateString(req.StartWorkDate, req.StartWorkDateCamel)
+	req.SchoolDepartmentID = firstNonEmptyUpdateString(req.SchoolDepartmentID, req.SchoolDepartmentIDCamel)
+	req.DepartmentID = firstNonEmptyUpdateString(req.DepartmentID, req.DepartmentIDCamel)
+	req.IsActive = firstNonNilBool(req.IsActive, req.IsActiveCamel)
 
 	item, err := c.svc.Update(ctx.Request.Context(), id, &req)
 	if err != nil {

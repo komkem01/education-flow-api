@@ -9,6 +9,7 @@ import (
 )
 
 type UpdateRequest struct {
+	Code     *string `json:"code"`
 	Name     *string `json:"name"`
 	IsActive *bool   `json:"is_active"`
 }
@@ -39,7 +40,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 		return
 	}
 
-	department, err := c.svc.Update(ctx.Request.Context(), id, req.Name, req.IsActive)
+	department, err := c.svc.Update(ctx.Request.Context(), id, req.Code, req.Name, req.IsActive)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "department-update-failed")
 		return

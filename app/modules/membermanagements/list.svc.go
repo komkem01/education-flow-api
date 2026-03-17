@@ -11,11 +11,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) List(ctx context.Context, req *base.RequestPaginate, isActive *bool, memberID *uuid.UUID, departmentID *uuid.UUID) ([]*ent.MemberManagement, *base.ResponsePaginate, error) {
+func (s *Service) List(ctx context.Context, req *base.RequestPaginate, isActive *bool, memberID *uuid.UUID, departmentID *uuid.UUID, schoolDepartmentID *uuid.UUID) ([]*ent.MemberManagement, *base.ResponsePaginate, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "membermanagements.service.list")
 	defer span.End()
 
-	items, page, err := s.db.ListMemberManagements(ctx, req, isActive, memberID, departmentID)
+	items, page, err := s.db.ListMemberManagements(ctx, req, isActive, memberID, departmentID, schoolDepartmentID)
 	if err != nil {
 		if base.IsPagErr(err) {
 			return nil, nil, fmt.Errorf("%w: %v", ErrMemberManagementConditionFail, err)

@@ -29,6 +29,8 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 		base.ValidateFailed(ctx, "condition-fail", nil)
 	case errors.Is(err, ErrMemberDuplicate):
 		base.BadRequest(ctx, "member-duplicate", nil)
+	case errors.Is(err, ErrMemberAdminLimit):
+		base.BadRequest(ctx, "member-admin-limit", nil)
 	default:
 		log.Errf("%s: %v", fallback, err)
 		base.InternalServerError(ctx, fallback, nil)

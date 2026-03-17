@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) Update(ctx context.Context, id uuid.UUID, name *string, isActive *bool) (*ent.Department, error) {
+func (s *Service) Update(ctx context.Context, id uuid.UUID, code *string, name *string, isActive *bool) (*ent.Department, error) {
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "departments.service.update")
 	defer span.End()
 
-	if name == nil && isActive == nil {
+	if code == nil && name == nil && isActive == nil {
 		return nil, fmt.Errorf("%w", ErrDepartmentConditionFail)
 	}
 
-	department, err := s.db.UpdateDepartmentByID(ctx, id, name, isActive)
+	department, err := s.db.UpdateDepartmentByID(ctx, id, code, name, isActive)
 	if err != nil {
 		return nil, normalizeServiceError(err)
 	}
@@ -26,6 +26,6 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, name *string, isActi
 	return department, nil
 }
 
-func (s *Service) UpdateService(ctx context.Context, id uuid.UUID, name *string, isActive *bool) (*ent.Department, error) {
-	return s.Update(ctx, id, name, isActive)
+func (s *Service) UpdateService(ctx context.Context, id uuid.UUID, code *string, name *string, isActive *bool) (*ent.Department, error) {
+	return s.Update(ctx, id, code, name, isActive)
 }

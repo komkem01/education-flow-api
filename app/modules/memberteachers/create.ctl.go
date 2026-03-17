@@ -18,7 +18,6 @@ type CreateRequest struct {
 	Password         string  `json:"password" binding:"required"`
 	GenderID         string  `json:"gender_id" binding:"required"`
 	PrefixID         string  `json:"prefix_id" binding:"required"`
-	Code             string  `json:"code" binding:"required"`
 	CitizenID        string  `json:"citizen_id" binding:"required"`
 	FirstNameTH      string  `json:"first_name_th" binding:"required"`
 	LastNameTH       string  `json:"last_name_th" binding:"required"`
@@ -163,7 +162,6 @@ func (c *Controller) Create(ctx *gin.Context) {
 		req.Password,
 		genderID,
 		prefixID,
-		req.Code,
 		req.CitizenID,
 		req.FirstNameTH,
 		req.LastNameTH,

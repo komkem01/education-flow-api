@@ -14,8 +14,9 @@ import (
 
 var _ entitiesinf.DepartmentEntity = (*Service)(nil)
 
-func (s *Service) CreateDepartment(ctx context.Context, name string, isActive bool) (*ent.Department, error) {
+func (s *Service) CreateDepartment(ctx context.Context, code string, name string, isActive bool) (*ent.Department, error) {
 	department := &ent.Department{
+		Code:     code,
 		Name:     name,
 		IsActive: isActive,
 	}
@@ -48,7 +49,7 @@ func (s *Service) ListDepartments(ctx context.Context, req *base.RequestPaginate
 		query.Where("is_active = ?", *isActive)
 	}
 
-	if err := req.SetSearchBy(query, []string{"name"}); err != nil {
+	if err := req.SetSearchBy(query, []string{"code", "name"}); err != nil {
 		return nil, nil, err
 	}
 
@@ -56,7 +57,7 @@ func (s *Service) ListDepartments(ctx context.Context, req *base.RequestPaginate
 		query.Order("created_at DESC")
 	}
 
-	if err := req.SetSortOrder(query, []string{"created_at", "name", "is_active"}); err != nil {
+	if err := req.SetSortOrder(query, []string{"created_at", "code", "name", "is_active"}); err != nil {
 		return nil, nil, err
 	}
 
@@ -74,11 +75,15 @@ func (s *Service) ListDepartments(ctx context.Context, req *base.RequestPaginate
 	}, nil
 }
 
-func (s *Service) UpdateDepartmentByID(ctx context.Context, id uuid.UUID, name *string, isActive *bool) (*ent.Department, error) {
+func (s *Service) UpdateDepartmentByID(ctx context.Context, id uuid.UUID, code *string, name *string, isActive *bool) (*ent.Department, error) {
 	query := s.db.NewUpdate().
 		Model(&ent.Department{}).
 		Where("id = ?", id).
 		Set("updated_at = now()")
+
+	if code != nil {
+		query.Set("code = ?", *code)
+	}
 
 	if name != nil {
 		query.Set("name = ?", *name)

@@ -12,6 +12,7 @@ import (
 
 type MemberEntity interface {
 	CreateMember(ctx context.Context, schoolID uuid.UUID, email string, password string, role ent.MemberRole, isActive bool, lastLogin *time.Time) (*ent.Member, error)
+	CountMembersBySchoolAndRole(ctx context.Context, schoolID uuid.UUID, role ent.MemberRole) (int64, error)
 	GetMemberByEmail(ctx context.Context, email string) (*ent.Member, error)
 	GetMemberByID(ctx context.Context, id uuid.UUID) (*ent.Member, error)
 	ListMembers(ctx context.Context, req *base.RequestPaginate, isActive *bool, schoolID *uuid.UUID, role *ent.MemberRole) ([]*ent.Member, *base.ResponsePaginate, error)

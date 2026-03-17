@@ -8,6 +8,7 @@ import (
 )
 
 type CreateRequest struct {
+	Code     string `json:"code" binding:"required"`
 	Name     string `json:"name" binding:"required"`
 	IsActive bool   `json:"is_active"`
 }
@@ -22,7 +23,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 		return
 	}
 
-	department, err := c.svc.Create(ctx.Request.Context(), req.Name, req.IsActive)
+	department, err := c.svc.Create(ctx.Request.Context(), req.Code, req.Name, req.IsActive)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "department-create-failed")
 		return

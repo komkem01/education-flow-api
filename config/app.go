@@ -23,7 +23,10 @@ import (
 	"eduflow/app/modules/memberteachers"
 	"eduflow/app/modules/pictures"
 	"eduflow/app/modules/prefixes"
+	"eduflow/app/modules/reports"
 	"eduflow/app/modules/s3"
+	"eduflow/app/modules/schoolannouncements"
+	"eduflow/app/modules/schooldepartments"
 	"eduflow/app/modules/schools"
 	"eduflow/app/modules/sentry"
 	"eduflow/app/modules/specs"
@@ -80,6 +83,7 @@ type Config struct {
 	Classrooms                classrooms.Config
 	SubjectGroups             subjectgroups.Config
 	Subjects                  subjects.Config
+	SchoolAnnouncements       schoolannouncements.Config
 	AuditLogs                 auditlogs.Config
 	S3                        s3.Config
 	Storages                  storages.Config
@@ -101,6 +105,8 @@ type Config struct {
 	StudentHealthProfiles     studenthealthprofiles.Config
 	MemberManagements         membermanagements.Config
 	MemberTeachers            memberteachers.Config
+	Reports                   reports.Config
+	SchoolDepartments         schooldepartments.Config
 	TeacherEducations         teachereducations.Config
 	TeacherEmergencyContacts  teacheremergencycontacts.Config
 	TeacherLicenses           teacherlicenses.Config

@@ -23,6 +23,16 @@ func (s *Service) Create(ctx context.Context, schoolID uuid.UUID, email string, 
 		role = ent.MemberRoleAdmin
 	}
 
+	if role == ent.MemberRoleAdmin {
+		adminCount, err := s.db.CountMembersBySchoolAndRole(ctx, schoolID, ent.MemberRoleAdmin)
+		if err != nil {
+			return nil, normalizeServiceError(err)
+		}
+		if adminCount >= 1 {
+			return nil, ErrMemberAdminLimit
+		}
+	}
+
 	hashed, err := hashing.HashPassword(password)
 	if err != nil {
 		return nil, err
