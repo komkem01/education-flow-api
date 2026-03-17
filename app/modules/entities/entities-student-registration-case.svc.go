@@ -173,7 +173,7 @@ func (s *Service) GetStudentRegistrationCaseDetailByID(ctx context.Context, id u
 	}
 
 	addresses := make([]*ent.StudentRegistrationAddress, 0)
-	if err := s.db.NewSelect().Model(&addresses).Where("case_id = ?", id).Order("address_type ASC, sort_order ASC").Scan(ctx); err != nil {
+	if err := s.db.NewSelect().Model(&addresses).Where("case_id = ?", id).Order("address_type ASC").Order("sort_order ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 	detail.Addresses = addresses
@@ -901,7 +901,8 @@ func (s *Service) composeRegistrationAddressText(ctx context.Context, tx bun.Tx,
 	err := tx.NewSelect().Model(row).
 		Where("case_id = ?", caseID).
 		Where("address_type = ?", addressType).
-		Order("is_primary DESC, sort_order ASC").
+		Order("is_primary DESC").
+		Order("sort_order ASC").
 		Limit(1).
 		Scan(ctx)
 	if err == sql.ErrNoRows {

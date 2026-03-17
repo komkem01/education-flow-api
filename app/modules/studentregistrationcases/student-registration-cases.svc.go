@@ -31,6 +31,15 @@ func normalizeServiceError(err error) error {
 	if strings.Contains(errText, "invalid-status") || strings.Contains(errText, "missing-student-id") || strings.Contains(errText, "missing-student-credentials") {
 		return fmt.Errorf("%w: %v", ErrStudentRegistrationCaseConditionFail, err)
 	}
+	if strings.Contains(errText, "foreign key constraint") ||
+		strings.Contains(errText, "violates check constraint") ||
+		strings.Contains(errText, "invalid input value for enum") ||
+		strings.Contains(errText, "null value in column") ||
+		strings.Contains(errText, "sqlstate=23503") ||
+		strings.Contains(errText, "sqlstate=23514") ||
+		strings.Contains(errText, "sqlstate=22p02") {
+		return fmt.Errorf("%w: %v", ErrStudentRegistrationCaseConditionFail, err)
+	}
 	return err
 }
 
