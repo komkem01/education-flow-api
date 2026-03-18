@@ -14,6 +14,7 @@ type Options struct {
 	tracer       trace.Tracer
 	db           entitiesinf.ApprovalRequestEntity
 	actionDB     entitiesinf.ApprovalActionEntity
+	studentRegDB entitiesinf.StudentRegistrationCaseEntity
 	memberDB     entitiesinf.MemberEntity
 	studentDB    entitiesinf.MemberStudentEntity
 	profileDB    entitiesinf.StudentProfileEntity
@@ -26,6 +27,7 @@ type Service struct {
 	tracer       trace.Tracer
 	db           entitiesinf.ApprovalRequestEntity
 	actionDB     entitiesinf.ApprovalActionEntity
+	studentRegDB entitiesinf.StudentRegistrationCaseEntity
 	memberDB     entitiesinf.MemberEntity
 	studentDB    entitiesinf.MemberStudentEntity
 	profileDB    entitiesinf.StudentProfileEntity
@@ -39,6 +41,7 @@ func newService(opt *Options) *Service {
 		tracer:       opt.tracer,
 		db:           opt.db,
 		actionDB:     opt.actionDB,
+		studentRegDB: opt.studentRegDB,
 		memberDB:     opt.memberDB,
 		studentDB:    opt.studentDB,
 		profileDB:    opt.profileDB,

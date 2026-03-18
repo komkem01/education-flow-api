@@ -152,6 +152,7 @@ func modulesInit() {
 		entitiesMod.Svc,
 		entitiesMod.Svc,
 		entitiesMod.Svc,
+		entitiesMod.Svc,
 	)
 	attendanceSessionsMod := attendancesessions.New(config.Conf[attendancesessions.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc, entitiesMod.Svc)
 	attendanceRecordsMod := attendancerecords.New(config.Conf[attendancerecords.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)

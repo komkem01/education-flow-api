@@ -38,6 +38,27 @@ func (s *Service) Approve(ctx context.Context, id uuid.UUID, actorID string, act
 	if item.CurrentStatus != ent.ApprovalRequestStatusPending {
 		return nil, fmt.Errorf("%w", ErrApprovalRequestConditionFail)
 	}
+
+	if item.RequestType == "student_registration_case" || item.SubjectType == "student_registration_case" {
+		if s.studentRegDB == nil || item.SubjectID == nil {
+			return nil, fmt.Errorf("%w", ErrApprovalRequestConditionFail)
+		}
+
+		if _, err := s.studentRegDB.ApproveAndApplyStudentRegistrationCase(
+			ctx,
+			*item.SubjectID,
+			parsedActorID,
+			parsedRole,
+			comment,
+			idempotencyKey,
+			metadata,
+		); err != nil {
+			return nil, normalizeServiceError(err)
+		}
+
+		return s.loadRequest(ctx, id)
+	}
+
 	if err := s.applyApprovalEffects(ctx, item); err != nil {
 		return nil, err
 	}
