@@ -13,16 +13,19 @@ type Options struct {
 	*config.Config[Config]
 	tracer trace.Tracer
 	db     entitiesinf.SchoolEntity
+	member entitiesinf.MemberEntity
 }
 
 type Service struct {
 	tracer trace.Tracer
 	db     entitiesinf.SchoolEntity
+	member entitiesinf.MemberEntity
 }
 
 func newService(opt *Options) *Service {
 	return &Service{
 		tracer: opt.tracer,
 		db:     opt.db,
+		member: opt.member,
 	}
 }

@@ -129,7 +129,7 @@ func modulesInit() {
 	exampleMod2 := exampletwo.New(config.Conf[exampletwo.Config](confMod.Svc), entitiesMod.Svc)
 	gendersMod := genders.New(config.Conf[genders.Config](confMod.Svc), entitiesMod.Svc)
 	prefixesMod := prefixes.New(config.Conf[prefixes.Config](confMod.Svc), entitiesMod.Svc)
-	schoolsMod := schools.New(config.Conf[schools.Config](confMod.Svc), entitiesMod.Svc)
+	schoolsMod := schools.New(config.Conf[schools.Config](confMod.Svc), entitiesMod.Svc, entitiesMod.Svc)
 	departmentsMod := departments.New(config.Conf[departments.Config](confMod.Svc), entitiesMod.Svc)
 	academicYearsMod := academicyears.New(config.Conf[academicyears.Config](confMod.Svc), entitiesMod.Svc)
 	classroomsMod := classrooms.New(config.Conf[classrooms.Config](confMod.Svc), entitiesMod.Svc)

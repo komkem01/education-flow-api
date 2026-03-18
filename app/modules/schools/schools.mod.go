@@ -14,12 +14,13 @@ type Module struct {
 	Ctl    *Controller
 }
 
-func New(conf *config.Config[Config], schoolEnt entitiesinf.SchoolEntity) *Module {
+func New(conf *config.Config[Config], schoolEnt entitiesinf.SchoolEntity, memberEnt entitiesinf.MemberEntity) *Module {
 	tracer := otel.Tracer("eduflow.modules.schools")
 	svc := newService(&Options{
 		Config: conf,
 		tracer: tracer,
 		db:     schoolEnt,
+		member: memberEnt,
 	})
 
 	return &Module{
