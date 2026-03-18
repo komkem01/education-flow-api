@@ -9,12 +9,14 @@ import (
 )
 
 type CreateRequest struct {
-	SchoolID          string `json:"school_id" binding:"required"`
-	AcademicYearID    string `json:"academic_year_id" binding:"required"`
-	Level             string `json:"level" binding:"required"`
-	RoomNo            string `json:"room_no" binding:"required"`
-	Name              string `json:"name" binding:"required"`
+	SchoolID          string `json:"school_id"`
+	AcademicYearID    string `json:"academic_year_id"`
+	Level             string `json:"level"`
+	GradeLevel        string `json:"grade_level"`
+	RoomNo            string `json:"room_no"`
+	Name              string `json:"name"`
 	HomeroomTeacherID string `json:"homeroom_teacher_id"`
+	AdvisorTeacherID  string `json:"advisor_teacher_id"`
 	Capacity          *int   `json:"capacity"`
 	IsActive          bool   `json:"is_active"`
 }
@@ -26,6 +28,34 @@ func (c *Controller) Create(ctx *gin.Context) {
 	var req CreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		base.BadRequest(ctx, "invalid-request", nil)
+		return
+	}
+
+	if req.Level == "" && req.GradeLevel != "" {
+		req.Level = req.GradeLevel
+	}
+	if req.HomeroomTeacherID == "" && req.AdvisorTeacherID != "" {
+		req.HomeroomTeacherID = req.AdvisorTeacherID
+	}
+
+	if req.SchoolID == "" {
+		base.BadRequest(ctx, "invalid-school-id", nil)
+		return
+	}
+	if req.AcademicYearID == "" {
+		base.BadRequest(ctx, "invalid-academic-year-id", nil)
+		return
+	}
+	if req.Level == "" {
+		base.BadRequest(ctx, "invalid-level", nil)
+		return
+	}
+	if req.RoomNo == "" {
+		base.BadRequest(ctx, "invalid-room-no", nil)
+		return
+	}
+	if req.Name == "" {
+		base.BadRequest(ctx, "invalid-name", nil)
 		return
 	}
 

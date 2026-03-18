@@ -9,11 +9,14 @@ import (
 )
 
 type CreateRequest struct {
-	EnrollmentID string  `json:"enrollment_id" binding:"required"`
-	SubjectID    string  `json:"subject_id" binding:"required"`
-	TeacherID    *string `json:"teacher_id"`
-	IsPrimary    bool    `json:"is_primary"`
-	Status       *string `json:"status"`
+	EnrollmentID  string   `json:"enrollment_id" binding:"required"`
+	SubjectID     string   `json:"subject_id" binding:"required"`
+	TeacherID     *string  `json:"teacher_id"`
+	IsPrimary     bool     `json:"is_primary"`
+	Status        *string  `json:"status"`
+	MidtermScore  *float64 `json:"midterm_score"`
+	FinalScore    *float64 `json:"final_score"`
+	ActivityScore *float64 `json:"activity_score"`
 }
 
 func (c *Controller) Create(ctx *gin.Context) {
@@ -37,7 +40,17 @@ func (c *Controller) Create(ctx *gin.Context) {
 		return
 	}
 
-	item, err := c.svc.Create(ctx.Request.Context(), enrollmentID, subjectID, req.TeacherID, req.IsPrimary, req.Status)
+	item, err := c.svc.Create(
+		ctx.Request.Context(),
+		enrollmentID,
+		subjectID,
+		req.TeacherID,
+		req.IsPrimary,
+		req.Status,
+		req.MidtermScore,
+		req.FinalScore,
+		req.ActivityScore,
+	)
 	if err != nil {
 		c.handleServiceError(ctx, log, err, "enrollment-subject-create-failed")
 		return

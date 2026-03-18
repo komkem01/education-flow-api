@@ -28,6 +28,7 @@ type ApprovalRequest struct {
 	bun.BaseModel `bun:"table:approval_requests,alias:ar"`
 
 	ID              uuid.UUID             `bun:"id,pk,type:uuid,default:gen_random_uuid()"`
+	RegistrationNo  string                `bun:"registration_no,notnull,type:varchar(32)"`
 	RequestType     string                `bun:"request_type,notnull"`
 	SubjectType     string                `bun:"subject_type,notnull"`
 	SubjectID       *uuid.UUID            `bun:"subject_id,type:uuid"`
@@ -42,6 +43,7 @@ type ApprovalRequest struct {
 }
 
 type ApprovalRequestUpdate struct {
+	RegistrationNo  *string
 	RequestType     *string
 	SubjectType     *string
 	SubjectID       *uuid.UUID

@@ -3,6 +3,7 @@ package entities
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"eduflow/app/modules/entities/ent"
 	entitiesinf "eduflow/app/modules/entities/inf"
@@ -48,6 +49,16 @@ func (s *Service) ListClassrooms(ctx context.Context, req *base.RequestPaginate,
 	}
 	if homeroomTeacherID != nil {
 		query.Where("homeroom_teacher_id = ?", *homeroomTeacherID)
+	}
+
+	search := strings.TrimSpace(req.Search)
+	if search != "" && strings.TrimSpace(req.SearchBy) == "" {
+		query.WhereGroup(" AND ", func(q *bun.SelectQuery) *bun.SelectQuery {
+			pattern := "%" + search + "%"
+			return q.Where("name::text LIKE ?", pattern).
+				WhereOr("level::text LIKE ?", pattern).
+				WhereOr("room_no::text LIKE ?", pattern)
+		})
 	}
 
 	if err := req.SetSearchBy(query, []string{"name", "level", "room_no"}); err != nil {

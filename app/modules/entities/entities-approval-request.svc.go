@@ -3,6 +3,7 @@ package entities
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"eduflow/app/modules/entities/ent"
 	entitiesinf "eduflow/app/modules/entities/inf"
@@ -14,10 +15,29 @@ import (
 var _ entitiesinf.ApprovalRequestEntity = (*Service)(nil)
 
 func (s *Service) CreateApprovalRequest(ctx context.Context, data *ent.ApprovalRequest) (*ent.ApprovalRequest, error) {
+	if data != nil && strings.TrimSpace(data.RegistrationNo) == "" {
+		registrationNo, err := s.generateApprovalRegistrationNo(ctx)
+		if err != nil {
+			return nil, err
+		}
+		data.RegistrationNo = registrationNo
+	}
+
 	if _, err := s.db.NewInsert().Model(data).Returning("*").Exec(ctx); err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+
+func (s *Service) generateApprovalRegistrationNo(ctx context.Context) (string, error) {
+	registrationNo := ""
+	err := s.db.NewSelect().
+		ColumnExpr("concat('APR-', lpad(nextval('approval_requests_registration_no_seq')::text, 6, '0'))").
+		Scan(ctx, &registrationNo)
+	if err != nil {
+		return "", err
+	}
+	return registrationNo, nil
 }
 
 func (s *Service) GetApprovalRequestByID(ctx context.Context, id uuid.UUID) (*ent.ApprovalRequest, error) {
@@ -77,6 +97,9 @@ func (s *Service) UpdateApprovalRequestByID(ctx context.Context, id uuid.UUID, d
 
 	if data.RequestType != nil {
 		query.Set("request_type = ?", *data.RequestType)
+	}
+	if data.RegistrationNo != nil {
+		query.Set("registration_no = ?", *data.RegistrationNo)
 	}
 	if data.SubjectType != nil {
 		query.Set("subject_type = ?", *data.SubjectType)

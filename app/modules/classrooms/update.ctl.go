@@ -16,9 +16,11 @@ type UpdateRequest struct {
 	SchoolID          *string `json:"school_id"`
 	AcademicYearID    *string `json:"academic_year_id"`
 	Level             *string `json:"level"`
+	GradeLevel        *string `json:"grade_level"`
 	RoomNo            *string `json:"room_no"`
 	Name              *string `json:"name"`
 	HomeroomTeacherID *string `json:"homeroom_teacher_id"`
+	AdvisorTeacherID  *string `json:"advisor_teacher_id"`
 	Capacity          *int    `json:"capacity"`
 	IsActive          *bool   `json:"is_active"`
 }
@@ -43,6 +45,13 @@ func (c *Controller) Update(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		base.BadRequest(ctx, "invalid-request", nil)
 		return
+	}
+
+	if req.Level == nil && req.GradeLevel != nil {
+		req.Level = req.GradeLevel
+	}
+	if req.HomeroomTeacherID == nil && req.AdvisorTeacherID != nil {
+		req.HomeroomTeacherID = req.AdvisorTeacherID
 	}
 
 	item, err := c.svc.Update(ctx.Request.Context(), id, &req)

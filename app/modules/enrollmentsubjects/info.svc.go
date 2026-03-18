@@ -18,5 +18,7 @@ func (s *Service) GetByID(ctx context.Context, id uuid.UUID) (*ent.EnrollmentSub
 		return nil, normalizeServiceError(err)
 	}
 
+	enrichScoreSummary(item)
+
 	return item, nil
 }

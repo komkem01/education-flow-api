@@ -13,11 +13,14 @@ type UpdateByIDRequest struct {
 }
 
 type UpdateRequest struct {
-	EnrollmentID *string `json:"enrollment_id"`
-	SubjectID    *string `json:"subject_id"`
-	TeacherID    *string `json:"teacher_id"`
-	IsPrimary    *bool   `json:"is_primary"`
-	Status       *string `json:"status"`
+	EnrollmentID  *string  `json:"enrollment_id"`
+	SubjectID     *string  `json:"subject_id"`
+	TeacherID     *string  `json:"teacher_id"`
+	IsPrimary     *bool    `json:"is_primary"`
+	Status        *string  `json:"status"`
+	MidtermScore  *float64 `json:"midterm_score"`
+	FinalScore    *float64 `json:"final_score"`
+	ActivityScore *float64 `json:"activity_score"`
 }
 
 func (c *Controller) Update(ctx *gin.Context) {

@@ -32,5 +32,7 @@ func (s *Service) List(ctx context.Context, req *base.RequestPaginate, enrollmen
 		return nil, nil, normalizeServiceError(err)
 	}
 
+	enrichScoreSummaryList(items)
+
 	return items, page, nil
 }

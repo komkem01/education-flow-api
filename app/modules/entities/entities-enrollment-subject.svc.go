@@ -93,6 +93,15 @@ func (s *Service) UpdateEnrollmentSubjectByID(ctx context.Context, id uuid.UUID,
 	if data.Status != nil {
 		query.Set("status = ?", *data.Status)
 	}
+	if data.MidtermScore != nil {
+		query.Set("midterm_score = ?", *data.MidtermScore)
+	}
+	if data.FinalScore != nil {
+		query.Set("final_score = ?", *data.FinalScore)
+	}
+	if data.ActivityScore != nil {
+		query.Set("activity_score = ?", *data.ActivityScore)
+	}
 
 	res, err := query.Exec(ctx)
 	if err != nil {

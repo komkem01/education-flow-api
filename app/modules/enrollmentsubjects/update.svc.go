@@ -14,11 +14,20 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest) 
 	ctx, span, _ := utils.NewLogSpan(ctx, s.tracer, "enrollmentsubjects.service.update")
 	defer span.End()
 
-	if req.EnrollmentID == nil && req.SubjectID == nil && req.TeacherID == nil && req.IsPrimary == nil && req.Status == nil {
+	if req.EnrollmentID == nil && req.SubjectID == nil && req.TeacherID == nil && req.IsPrimary == nil && req.Status == nil && req.MidtermScore == nil && req.FinalScore == nil && req.ActivityScore == nil {
 		return nil, fmt.Errorf("%w", ErrEnrollmentSubjectConditionFail)
 	}
 
-	payload := &ent.EnrollmentSubjectUpdate{IsPrimary: req.IsPrimary}
+	if !isValidScore(req.MidtermScore) || !isValidScore(req.FinalScore) || !isValidScore(req.ActivityScore) {
+		return nil, fmt.Errorf("%w", ErrEnrollmentSubjectConditionFail)
+	}
+
+	payload := &ent.EnrollmentSubjectUpdate{
+		IsPrimary:     req.IsPrimary,
+		MidtermScore:  req.MidtermScore,
+		FinalScore:    req.FinalScore,
+		ActivityScore: req.ActivityScore,
+	}
 
 	var err error
 	payload.EnrollmentID, err = parseOptionalUUID(req.EnrollmentID)
@@ -46,6 +55,8 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, req *UpdateRequest) 
 	if err != nil {
 		return nil, normalizeServiceError(err)
 	}
+
+	enrichScoreSummary(item)
 
 	return item, nil
 }
