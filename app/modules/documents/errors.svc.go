@@ -29,7 +29,7 @@ func normalizeServiceError(err error) error {
 	if errors.Is(err, s3.ErrS3InvalidObjectKey) {
 		return err
 	}
-	if errors.Is(err, s3.ErrS3InvalidConfig) || errors.Is(err, s3.ErrS3PresignFailed) {
+	if errors.Is(err, s3.ErrS3InvalidConfig) || errors.Is(err, s3.ErrS3PresignFailed) || errors.Is(err, s3.ErrS3UploadFailed) {
 		return fmt.Errorf("%w: %v", ErrDocumentConditionFail, err)
 	}
 	return err

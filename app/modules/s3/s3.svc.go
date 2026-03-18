@@ -3,7 +3,9 @@ package s3
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -19,6 +21,7 @@ type Config struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	BucketName      string
+	Region          string
 	UseSSL          bool
 }
 
@@ -39,19 +42,55 @@ func newService(opt *Options) (*Service, error) {
 	}
 
 	cfg := opt.Val
-	if strings.TrimSpace(cfg.Endpoint) == "" || strings.TrimSpace(cfg.AccessKeyID) == "" || strings.TrimSpace(cfg.SecretAccessKey) == "" || strings.TrimSpace(cfg.BucketName) == "" {
-		return &Service{tracer: opt.tracer, defaultBucket: strings.TrimSpace(cfg.BucketName)}, nil
+	endpoint := strings.TrimSpace(cfg.Endpoint)
+	accessKey := strings.TrimSpace(cfg.AccessKeyID)
+	secretKey := strings.TrimSpace(cfg.SecretAccessKey)
+	bucketName := strings.TrimSpace(cfg.BucketName)
+	region := strings.TrimSpace(cfg.Region)
+	useSSL := cfg.UseSSL
+
+	if endpoint == "" {
+		endpoint = strings.TrimSpace(os.Getenv("OBJECT_ENDPOINT_URL"))
+	}
+	if accessKey == "" {
+		accessKey = strings.TrimSpace(os.Getenv("OBJECT_ACCESS_KEY_ID"))
+	}
+	if secretKey == "" {
+		secretKey = strings.TrimSpace(os.Getenv("OBJECT_SECRET_ACCESS_KEY"))
+	}
+	if bucketName == "" {
+		bucketName = strings.TrimSpace(os.Getenv("OBJECT_PUBLIC_BUCKET"))
+	}
+	if region == "" {
+		region = strings.TrimSpace(os.Getenv("OBJECT_REGION"))
 	}
 
-	client, err := minio.New(cfg.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
-		Secure: cfg.UseSSL,
+	if strings.HasPrefix(endpoint, "http://") || strings.HasPrefix(endpoint, "https://") {
+		if parsed, err := url.Parse(endpoint); err == nil {
+			if parsed.Host != "" {
+				endpoint = parsed.Host
+			}
+			if parsed.Scheme == "https" {
+				useSSL = true
+			}
+		}
+	}
+
+	if endpoint == "" || accessKey == "" || secretKey == "" || bucketName == "" {
+		return &Service{tracer: opt.tracer, defaultBucket: bucketName}, nil
+	}
+
+	client, err := minio.New(endpoint, &minio.Options{
+		Creds:        credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure:       useSSL,
+		Region:       region,
+		BucketLookup: minio.BucketLookupPath,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrS3InvalidConfig, err)
 	}
 
-	return &Service{tracer: opt.tracer, client: client, defaultBucket: cfg.BucketName}, nil
+	return &Service{tracer: opt.tracer, client: client, defaultBucket: bucketName}, nil
 }
 
 func (s *Service) PresignUploadURL(ctx context.Context, bucket string, objectKey string, expires time.Duration) (string, error) {
@@ -111,12 +150,48 @@ func (s *Service) resolveBucket(bucket string) (string, error) {
 	return bucket, nil
 }
 
+func (s *Service) UploadObject(ctx context.Context, bucket string, objectKey string, reader io.Reader, size int64, contentType string) error {
+	if s.client == nil {
+		return fmt.Errorf("%w", ErrS3InvalidConfig)
+	}
+	if !isValidObjectKey(objectKey) {
+		return fmt.Errorf("%w", ErrS3InvalidObjectKey)
+	}
+	bucketName, err := s.resolveBucket(bucket)
+	if err != nil {
+		return err
+	}
+	if reader == nil {
+		return fmt.Errorf("%w", ErrS3UploadFailed)
+	}
+	if size < 0 {
+		return fmt.Errorf("%w", ErrS3UploadFailed)
+	}
+	if strings.TrimSpace(contentType) == "" {
+		contentType = "application/octet-stream"
+	}
+
+	_, err = s.client.PutObject(ctx, bucketName, objectKey, reader, size, minio.PutObjectOptions{
+		ContentType: contentType,
+	})
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrS3UploadFailed, err)
+	}
+
+	return nil
+}
+
 func isValidObjectKey(v string) bool {
 	v = strings.TrimSpace(v)
 	if v == "" || len(v) > 512 {
 		return false
 	}
-	if strings.HasPrefix(v, "/") || strings.Contains(v, "..") {
+	if strings.HasPrefix(v, "/") {
+		return false
+	}
+
+	normalized := strings.ReplaceAll(v, "\\", "/")
+	if strings.HasPrefix(normalized, "../") || strings.HasSuffix(normalized, "/..") || strings.Contains(normalized, "/../") {
 		return false
 	}
 	return true

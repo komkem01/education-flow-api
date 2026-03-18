@@ -37,6 +37,7 @@ type Document struct {
 
 type DocumentUpdate struct {
 	OwnerMemberID *uuid.UUID
+	ObjectKey     *string
 	FileName      *string
 	ContentType   *string
 	SizeBytes     *int64

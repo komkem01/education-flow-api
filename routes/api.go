@@ -243,6 +243,7 @@ func apiMember(r *gin.RouterGroup, mod *modules.Modules) {
 			documents.GET("", mod.Documents.Ctl.DocumentsList)
 			documents.GET("/:id", mod.Documents.Ctl.DocumentsInfo)
 			documents.POST("", mod.Documents.Ctl.CreateDocumentController)
+			documents.POST("/:id/upload", mod.Documents.Ctl.DocumentsUpload)
 			documents.POST("/presign-upload", mod.Documents.Ctl.DocumentsPresignUpload)
 			documents.GET("/presign-download", mod.Documents.Ctl.DocumentsPresignDownload)
 			documents.DELETE("/:id", mod.Documents.Ctl.DocumentsDelete)

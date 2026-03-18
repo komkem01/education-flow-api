@@ -19,10 +19,7 @@ func (s *Service) Create(ctx context.Context, schoolID uuid.UUID, uploadedByMemb
 		return nil, fmt.Errorf("%w", ErrDocumentConditionFail)
 	}
 
-	targetBucket := s.defaultBucket
-	if bucketName != nil && strings.TrimSpace(*bucketName) != "" {
-		targetBucket = strings.TrimSpace(*bucketName)
-	}
+	targetBucket := s.resolveBucketName(bucketName)
 	if targetBucket == "" {
 		return nil, fmt.Errorf("%w", ErrDocumentConditionFail)
 	}

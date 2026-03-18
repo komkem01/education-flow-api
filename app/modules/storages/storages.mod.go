@@ -9,14 +9,49 @@ import (
 )
 
 type Module struct {
-	tracer trace.Tracer
-	Svc    *Service
-	Ctl    *Controller
+	Svc *Service
+	Ctl *Controller
+}
+
+type Config struct{}
+
+type RailwayConfig struct {
+	URL            string
+	ServiceRoleKey string
+	PublicBucket   string
+	PrivateBucket  string
+}
+
+type (
+	Service struct {
+		tracer         trace.Tracer
+		db             entitiesinf.StorageEntity
+		railwayStorage *railwayStorageClient
+	}
+)
+
+type Options struct {
+	*config.Config[Config]
+	tracer      trace.Tracer
+	db          entitiesinf.StorageEntity
+	railwayConf RailwayConfig
 }
 
 func New(conf *config.Config[Config], db entitiesinf.StorageEntity) *Module {
-	tracer := otel.Tracer("eduflow.modules.storages")
-	svc := newService(&Options{Config: conf, tracer: tracer, db: db})
+	tracer := otel.Tracer("storages_module")
+	svc := newService(&Options{
+		Config:      conf,
+		tracer:      tracer,
+		db:          db,
+		railwayConf: RailwayConfig{},
+	})
+	return &Module{Svc: svc, Ctl: newController(tracer, svc)}
+}
 
-	return &Module{tracer: tracer, Svc: svc, Ctl: newController(tracer, svc)}
+func newService(opt *Options) *Service {
+	return &Service{
+		tracer:         opt.tracer,
+		db:             opt.db,
+		railwayStorage: newRailwayStorageClient(opt.railwayConf),
+	}
 }

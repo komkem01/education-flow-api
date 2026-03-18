@@ -3,6 +3,7 @@ package documents
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -38,6 +39,19 @@ type Service struct {
 	defaultBucket         string
 }
 
+func (s *Service) resolveBucketName(bucket *string) string {
+	targetBucket := strings.TrimSpace(s.defaultBucket)
+	if bucket != nil && strings.TrimSpace(*bucket) != "" {
+		targetBucket = strings.TrimSpace(*bucket)
+	}
+
+	if targetBucket == "" {
+		targetBucket = "school-documents"
+	}
+
+	return strings.TrimSpace(targetBucket)
+}
+
 func newService(opt *Options) *Service {
 	uploadExpire := time.Duration(opt.Val.DefaultUploadExpireSeconds) * time.Second
 	if uploadExpire <= 0 {
@@ -49,6 +63,14 @@ func newService(opt *Options) *Service {
 		downloadExpire = 15 * time.Minute
 	}
 
+	defaultBucket := strings.TrimSpace(opt.Val.DefaultBucket)
+	if defaultBucket == "" {
+		defaultBucket = strings.TrimSpace(os.Getenv("DOCUMENTS__DEFAULT_BUCKET"))
+	}
+	if defaultBucket == "" {
+		defaultBucket = strings.TrimSpace(os.Getenv("OBJECT_PUBLIC_BUCKET"))
+	}
+
 	return &Service{
 		tracer:                opt.tracer,
 		s3:                    opt.s3,
@@ -56,7 +78,7 @@ func newService(opt *Options) *Service {
 		storageDB:             opt.storageDB,
 		defaultUploadExpire:   uploadExpire,
 		defaultDownloadExpire: downloadExpire,
-		defaultBucket:         strings.TrimSpace(opt.Val.DefaultBucket),
+		defaultBucket:         defaultBucket,
 	}
 }
 
@@ -71,10 +93,7 @@ func parseDocumentStatus(v string) (ent.DocumentStatus, bool) {
 }
 
 func (s *Service) PresignUploadURL(ctx context.Context, objectKey string, bucket *string, expiresSeconds *int64) (string, error) {
-	targetBucket := s.defaultBucket
-	if bucket != nil && strings.TrimSpace(*bucket) != "" {
-		targetBucket = strings.TrimSpace(*bucket)
-	}
+	targetBucket := s.resolveBucketName(bucket)
 
 	expires := s.defaultUploadExpire
 	if expiresSeconds != nil && *expiresSeconds > 0 {
@@ -93,10 +112,7 @@ func (s *Service) PresignUploadURL(ctx context.Context, objectKey string, bucket
 }
 
 func (s *Service) PresignDownloadURL(ctx context.Context, objectKey string, bucket *string, expiresSeconds *int64) (string, error) {
-	targetBucket := s.defaultBucket
-	if bucket != nil && strings.TrimSpace(*bucket) != "" {
-		targetBucket = strings.TrimSpace(*bucket)
-	}
+	targetBucket := s.resolveBucketName(bucket)
 
 	expires := s.defaultDownloadExpire
 	if expiresSeconds != nil && *expiresSeconds > 0 {

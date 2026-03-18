@@ -34,6 +34,7 @@ func (c *Controller) handleServiceError(ctx *gin.Context, log *logpkg.Logger, er
 	case errors.Is(err, ErrDocumentUnauthorized):
 		base.Unauthorized(ctx, "unauthorized", nil)
 	case errors.Is(err, ErrDocumentConditionFail):
+		log.Errf("%s: %v", fallback, err)
 		base.ValidateFailed(ctx, "condition-fail", nil)
 	case errors.Is(err, s3.ErrS3InvalidObjectKey):
 		base.BadRequest(ctx, "invalid-document-object-key", nil)

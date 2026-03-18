@@ -3,6 +3,7 @@ package pictures
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -50,6 +51,14 @@ func newService(opt *Options) *Service {
 		downloadExpire = 15 * time.Minute
 	}
 
+	defaultBucket := strings.TrimSpace(opt.Val.DefaultBucket)
+	if defaultBucket == "" {
+		defaultBucket = strings.TrimSpace(os.Getenv("PICTURES__DEFAULT_BUCKET"))
+	}
+	if defaultBucket == "" {
+		defaultBucket = strings.TrimSpace(os.Getenv("OBJECT_PUBLIC_BUCKET"))
+	}
+
 	return &Service{
 		tracer:                opt.tracer,
 		s3:                    opt.s3,
@@ -57,7 +66,7 @@ func newService(opt *Options) *Service {
 		storageDB:             opt.storageDB,
 		defaultUploadExpire:   uploadExpire,
 		defaultDownloadExpire: downloadExpire,
-		defaultBucket:         strings.TrimSpace(opt.Val.DefaultBucket),
+		defaultBucket:         defaultBucket,
 	}
 }
 

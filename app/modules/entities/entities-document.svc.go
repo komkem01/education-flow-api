@@ -82,6 +82,9 @@ func (s *Service) UpdateDocumentByID(ctx context.Context, id uuid.UUID, schoolID
 	if data.OwnerMemberID != nil {
 		query.Set("owner_member_id = ?", *data.OwnerMemberID)
 	}
+	if data.ObjectKey != nil {
+		query.Set("object_key = ?", *data.ObjectKey)
+	}
 	if data.FileName != nil {
 		query.Set("file_name = ?", *data.FileName)
 	}
